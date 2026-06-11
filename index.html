@@ -45,8 +45,7 @@
     .btn-wrong.flash { background: #CE2B37; color: #fff; }
     .btn-right { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
     .btn-right.flash { background: #009246; color: #fff; }
-    .btn-hint { text-align: center; font-size: 11px; color: #ccc; margin-top: 2px; }
-    .card-count { text-align: center; font-size: 15px; color: #888; margin-top: 8px; }
+    .btn-hint { text-align: center; font-size: 12px; color: #b0b0b0; margin-top: 2px; }
 
     .form-card { background: #fff; border: 0.5px solid #ddd; border-radius: 16px; padding: 1.5rem; margin-bottom: 16px; }
     .form-label { font-size: 15px; color: #888; display: block; margin-bottom: 4px; }
@@ -58,9 +57,9 @@
     .add-msg.err { color: #CE2B37; }
 
     .deck-top { display: flex; gap: 10px; margin-bottom: 16px; }
-    .search-box { flex: 1; padding: 11px 13px; border: 0.5px solid #ddd; border-radius: 12px; font-size: 15px; outline: none; background: #fff; }
+    .search-box { flex: 1; padding: 8px 13px; border: 0.5px solid #ddd; border-radius: 12px; font-size: 15px; outline: none; background: #fff; }
     .search-box:focus { border-color: #009246; }
-    .stat-card-single { background: #eee; border-radius: 10px; padding: 12px 8px; text-align: center; min-width: 80px; }
+    .stat-card-single { background: #eee; border-radius: 10px; padding: 8px 8px; text-align: center; min-width: 80px; }
     .stat-label { font-size: 13px; color: #888; margin-bottom: 4px; }
     .stat-val { font-size: 24px; font-weight: 500; }
     .stats-list { background: #fff; border: 0.5px solid #ddd; border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 16px; }
@@ -136,22 +135,7 @@ var INITIAL_CARDS = [
   { id: 2, fr: "le chien", it: "il cane", emoji: "🐶" },
   { id: 3, fr: "la maison", it: "la casa", emoji: "🏠" },
   { id: 4, fr: "le livre", it: "il libro", emoji: "📚" },
-  { id: 5, fr: "la pomme", it: "la mela", emoji: "🍎" },
-  { id: 6, fr: "l'eau", it: "l'acqua", emoji: "💧" },
-  { id: 7, fr: "le soleil", it: "il sole", emoji: "☀️" },
-  { id: 8, fr: "la lune", it: "la luna", emoji: "🌙" },
-  { id: 9, fr: "le pain", it: "il pane", emoji: "🍞" },
-  { id: 10, fr: "la fleur", it: "il fiore", emoji: "🌸" },
-  { id: 11, fr: "la voiture", it: "la macchina", emoji: "🚗" },
-  { id: 12, fr: "l'avion", it: "l'aereo", emoji: "✈️" },
-  { id: 13, fr: "la mer", it: "il mare", emoji: "🌊" },
-  { id: 14, fr: "la montagne", it: "la montagna", emoji: "⛰️" },
-  { id: 15, fr: "le feu", it: "il fuoco", emoji: "🔥" },
-  { id: 16, fr: "la main", it: "la mano", emoji: "✋" },
-  { id: 17, fr: "l'œil", it: "l'occhio", emoji: "👁️" },
-  { id: 18, fr: "le cœur", it: "il cuore", emoji: "❤️" },
-  { id: 19, fr: "l'arbre", it: "l'albero", emoji: "🌳" },
-  { id: 20, fr: "l'oiseau", it: "l'uccello", emoji: "🐦" }
+  { id: 5, fr: "la pomme", it: "la mela", emoji: "🍎" }
 ];
 
 var raw = JSON.parse(localStorage.getItem("fc_cards") || "null") || INITIAL_CARDS;
@@ -246,11 +230,7 @@ function render() {
       html += "<button class='btn-wrong' id='btn-wrong' onclick=\"flashBtn('btn-wrong', false)\" onmousedown='startBtnPress()' onmouseup='cancelBtnPress()' onmouseleave='cancelBtnPress()' ontouchstart='startBtnPress()' ontouchend='cancelBtnPress()' ontouchcancel='cancelBtnPress()'>✗ À revoir</button>";
       html += "<button class='btn-right' id='btn-right' onclick=\"flashBtn('btn-right', true)\" onmousedown='startBtnPress()' onmouseup='cancelBtnPress()' onmouseleave='cancelBtnPress()' ontouchstart='startBtnPress()' ontouchend='cancelBtnPress()' ontouchcancel='cancelBtnPress()'>✓ Je savais</button>";
       html += "</div>";
-      html += "<p class='btn-hint'>Appui long sur un bouton pour plus d'options</p>";
-
-      var activeCount = 0;
-      for (var k=0;k<cards.length;k++) if (isCardActive(cards[k])) activeCount++;
-      html += "<p id='card-count' class='card-count' style='display:" + (flipped?"none":"block") + "'>" + activeCount + " cartes actives</p>";
+      html += "<p id='btn-hint' class='btn-hint' style='display:" + (flipped?"block":"none") + "'>Appui long sur un bouton pour plus d'options</p>";
     } else {
       html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte disponible.</p>";
     }
@@ -335,16 +315,16 @@ function flipCard() {
   flipped = !flipped;
   var inner = document.querySelector(".card-inner");
   var btns = document.getElementById("answer-btns");
-  var count = document.getElementById("card-count");
+  var hint = document.getElementById("btn-hint");
   if (inner) {
     if (flipped) {
       inner.classList.add("flipped");
       if (btns) btns.style.display = "flex";
-      if (count) count.style.display = "none";
+      if (hint) hint.style.display = "block";
     } else {
       inner.classList.remove("flipped");
       if (btns) btns.style.display = "none";
-      if (count) count.style.display = "block";
+      if (hint) hint.style.display = "none";
     }
   }
 }

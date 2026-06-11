@@ -25,6 +25,7 @@
     .card-inner.flipped { transform: rotateY(180deg); }
     .card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 1.2rem; }
     .card-front { background: #fff; border: 2.5px solid #ddd; }
+    .card-back { background: #fff; border: 2.5px solid #ddd; transform: rotateY(180deg); }
     .card-emoji { font-size: 56px; }
     .card-word { font-size: 36px; font-weight: 600; text-align: center; word-break: break-word; hyphens: auto; max-width: 100%; line-height: 1.2; }
     .card-sub { font-size: 22px; font-weight: 400; text-align: center; word-break: break-word; max-width: 100%; line-height: 1.2; }
@@ -119,6 +120,21 @@ const INITIAL_CARDS = [
   { id: 3, fr: "la maison", it: "la casa", emoji: "🏠" },
   { id: 4, fr: "le livre", it: "il libro", emoji: "📚" },
   { id: 5, fr: "la pomme", it: "la mela", emoji: "🍎" },
+  { id: 6, fr: "l'eau", it: "l'acqua", emoji: "💧" },
+  { id: 7, fr: "le soleil", it: "il sole", emoji: "☀️" },
+  { id: 8, fr: "la lune", it: "la luna", emoji: "🌙" },
+  { id: 9, fr: "le pain", it: "il pane", emoji: "🍞" },
+  { id: 10, fr: "la fleur", it: "il fiore", emoji: "🌸" },
+  { id: 11, fr: "la voiture", it: "la macchina", emoji: "🚗" },
+  { id: 12, fr: "l'avion", it: "l'aereo", emoji: "✈️" },
+  { id: 13, fr: "la mer", it: "il mare", emoji: "🌊" },
+  { id: 14, fr: "la montagne", it: "la montagna", emoji: "⛰️" },
+  { id: 15, fr: "le feu", it: "il fuoco", emoji: "🔥" },
+  { id: 16, fr: "la main", it: "la mano", emoji: "✋" },
+  { id: 17, fr: "l'œil", it: "l'occhio", emoji: "👁️" },
+  { id: 18, fr: "le cœur", it: "il cuore", emoji: "❤️" },
+  { id: 19, fr: "l'arbre", it: "l'albero", emoji: "🌳" },
+  { id: 20, fr: "l'oiseau", it: "l'uccello", emoji: "🐦" },
 ];
 
 let raw = JSON.parse(localStorage.getItem("fc_cards") || "null") || INITIAL_CARDS;
@@ -200,7 +216,7 @@ function render() {
             <div class="card-lang">${lang}</div>
             <div class="card-hint">Cliquer pour retourner</div>
           </div>
-          <div class="card-face card-back" style="background:#fff;border:2.5px solid #ddd;">
+          <div class="card-face card-back">
             ${e ? `<div class="card-emoji">${e}</div>` : ""}
             <div class="card-word" style="color:#222;">${back}</div>
             <div class="card-sub" style="color:#555;">${front}</div>

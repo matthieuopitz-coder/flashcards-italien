@@ -98,33 +98,6 @@
 <input type="file" id="import-input" accept=".json" style="display:none" onchange="importCards(event)" />
 
 <script>
-var EMOJI_MAP = {
-  "chat":"🐱","chien":"🐶","cheval":"🐴","vache":"🐮","mouton":"🐑","cochon":"🐷","poule":"🐔","canard":"🦆","lapin":"🐰","souris":"🐭","poisson":"🐟","dauphin":"🐬","baleine":"🐳","lion":"🦁","tigre":"🐯","ours":"🐻","singe":"🐒","elephant":"🐘","girafe":"🦒","zebre":"🦓","serpent":"🐍","grenouille":"🐸","oiseau":"🐦","aigle":"🦅","hibou":"🦉","pingouin":"🐧","abeille":"🐝","papillon":"🦋","araignee":"🕷️","fourmi":"🐜",
-  "pomme":"🍎","banane":"🍌","orange":"🍊","citron":"🍋","fraise":"🍓","cerise":"🍒","raisin":"🍇","peche":"🍑","poire":"🍐","ananas":"🍍","melon":"🍈","pasteque":"🍉","mangue":"🥭","kiwi":"🥝","tomate":"🍅","carotte":"🥕","mais":"🌽","brocoli":"🥦","salade":"🥬","aubergine":"🍆","patate":"🥔","oignon":"🧅","ail":"🧄","champignon":"🍄","pain":"🍞","pizza":"🍕","burger":"🍔","frites":"🍟","sushi":"🍣","pates":"🍝","riz":"🍚","soupe":"🍜","gateau":"🎂","glace":"🍦","chocolat":"🍫","bonbon":"🍬","cafe":"☕","the":"🍵","eau":"💧","lait":"🥛","jus":"🧃","biere":"🍺","vin":"🍷",
-  "maison":"🏠","appartement":"🏢","ecole":"🏫","hopital":"🏥","eglise":"⛪","chateau":"🏰","tour":"🗼","pont":"🌉","plage":"🏖️","montagne":"⛰️","foret":"🌲","desert":"🏜️","ile":"🏝️","mer":"🌊","riviere":"🏞️","volcan":"🌋","ville":"🏙️",
-  "voiture":"🚗","camion":"🚚","bus":"🚌","velo":"🚲","moto":"🏍️","train":"🚂","avion":"✈️","bateau":"⛵","fusee":"🚀","helicoptere":"🚁","ambulance":"🚑","taxi":"🚕","trottinette":"🛴","metro":"🚇",
-  "balais":"🧹","aspirateur":"🧹","savon":"🧼","shampooing":"🧴","miroir":"🪞","fenetre":"🪟","porte":"🚪","lit":"🛏️","canape":"🛋️","chaise":"🪑","escalier":"🪜",
-  "telephone":"📱","ordinateur":"💻","television":"📺","radio":"📻","camera":"🎥","livre":"📚","journal":"📰","lettre":"✉️","crayon":"✏️","stylo":"🖊️","ciseaux":"✂️","clef":"🔑","cadenas":"🔒","lampe":"💡","loupe":"🔍","lunettes":"👓","montre":"⌚","sac":"👜","valise":"🧳","parapluie":"☂️",
-  "soleil":"☀️","lune":"🌙","etoile":"⭐","nuage":"☁️","pluie":"🌧️","neige":"❄️","feu":"🔥","vent":"💨","foudre":"⚡","fleur":"🌸","rose":"🥀","arbre":"🌳","feuille":"🍃","herbe":"🌿","cactus":"🌵","graine":"🌱",
-  "main":"✋","pied":"🦶","oeil":"👁️","oreille":"👂","nez":"👃","bouche":"👄","coeur":"❤️","cerveau":"🧠","muscle":"💪","os":"🦴","dent":"🦷",
-  "bebe":"👶","enfant":"🧒","homme":"👨","femme":"👩","garcon":"👦","fille":"👧","famille":"👨‍👩‍👧","roi":"🤴","reine":"👸","policier":"👮","medecin":"👨‍⚕️","professeur":"👨‍🏫","cuisinier":"👨‍🍳","astronaute":"👨‍🚀",
-  "football":"⚽","basketball":"🏀","tennis":"🎾","natation":"🏊","ski":"⛷️","surf":"🏄","boxe":"🥊","golf":"⛳","rugby":"🏉","baseball":"⚾","volleyball":"🏐",
-  "musique":"🎵","guitare":"🎸","piano":"🎹","violon":"🎻","trompette":"🎺","batterie":"🥁","micro":"🎤","casque":"🎧","cinema":"🎬","theatre":"🎭","peinture":"🎨","danse":"💃","fete":"🎉","cadeau":"🎁","ballon":"🎈",
-  "argent":"💰","piece":"🪙","billet":"💵","couronne":"👑","trophee":"🏆","medaille":"🥇","diplome":"🎓"
-};
-
-function findEmoji(fr) {
-  if (!fr) return null;
-  var clean = fr.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  if (EMOJI_MAP[clean]) return EMOJI_MAP[clean];
-  var noArticle = clean.replace(/^(le |la |l'|l’|les |un |une |des )/, "").trim();
-  if (EMOJI_MAP[noArticle]) return EMOJI_MAP[noArticle];
-  for (var key in EMOJI_MAP) {
-    if (noArticle === key || noArticle.indexOf(key) !== -1) return EMOJI_MAP[key];
-  }
-  return null;
-}
-
 function cleanEmoji(val) {
   if (!val || val === "null" || val === "undefined") return null;
   return val;
@@ -144,7 +117,11 @@ var INITIAL_CARDS = [
 ];
 
 var raw = JSON.parse(localStorage.getItem("fc_cards") || "null") || INITIAL_CARDS;
-var cards = raw.map(function(c) { return Object.assign({}, c, { emoji: cleanEmoji(c.emoji) }); });
+var cards = raw.map(function(c) {
+  // Garde l'emoji uniquement pour les 5 cartes par défaut, nettoie tout le reste
+  var emoji = (c.id >= 1 && c.id <= 5) ? cleanEmoji(c.emoji) : null;
+  return Object.assign({}, c, { emoji: emoji });
+});
 var scores = JSON.parse(localStorage.getItem("fc_scores") || "{}");
 var nextId = Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1;
 var deck = [], idx = 0, flipped = false;

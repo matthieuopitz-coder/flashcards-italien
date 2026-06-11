@@ -20,17 +20,26 @@
     .tab { padding: 9px 20px; border-radius: 20px; border: none; cursor: pointer; font-size: 16px; font-weight: 500; background: transparent; color: #888; transition: all 0.2s; }
     .tab.active { background: #009246; color: #fff; }
     .session-bar { display: flex; justify-content: space-between; font-size: 15px; color: #888; margin-bottom: 12px; }
+
     .card-wrap { perspective: 1000px; cursor: pointer; height: 270px; margin-bottom: 20px; }
     .card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.5s; border-radius: 16px; }
     .card-inner.flipped { transform: rotateY(180deg); }
-    .card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 1.2rem; }
-    .card-front { background: #fff; border: 2.5px solid #ddd; }
-    .card-back { background: #fff; border: 2.5px solid #ddd; transform: rotateY(180deg); }
+    .card-face {
+      position: absolute; inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 16px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; padding: 1.2rem;
+      background: #fff; border: 2.5px solid #ddd;
+    }
+    .card-back { transform: rotateY(180deg); }
     .card-emoji { font-size: 56px; }
-    .card-word { font-size: 36px; font-weight: 600; text-align: center; word-break: break-word; hyphens: auto; max-width: 100%; line-height: 1.2; }
-    .card-sub { font-size: 22px; font-weight: 400; text-align: center; word-break: break-word; max-width: 100%; line-height: 1.2; }
+    .card-word { font-size: 36px; font-weight: 600; text-align: center; word-break: break-word; max-width: 100%; line-height: 1.2; }
+    .card-sub { font-size: 22px; font-weight: 400; text-align: center; color: #555; word-break: break-word; max-width: 100%; line-height: 1.2; }
     .card-lang { font-size: 26px; letter-spacing: 4px; }
     .card-hint { font-size: 13px; color: #bbb; margin-top: 2px; }
+
     .answer-btns { display: flex; gap: 12px; margin-bottom: 6px; }
     .btn-wrong { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #CE2B37; background: transparent; color: #CE2B37; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
     .btn-wrong.flash { background: #CE2B37; color: #fff; }
@@ -38,6 +47,7 @@
     .btn-right.flash { background: #009246; color: #fff; }
     .btn-hint { text-align: center; font-size: 11px; color: #ccc; margin-top: 2px; }
     .card-count { text-align: center; font-size: 15px; color: #888; margin-top: 8px; }
+
     .form-card { background: #fff; border: 0.5px solid #ddd; border-radius: 16px; padding: 1.5rem; margin-bottom: 16px; }
     .form-label { font-size: 15px; color: #888; display: block; margin-bottom: 4px; }
     .form-input { width: 100%; padding: 11px 13px; border: 0.5px solid #ddd; border-radius: 8px; font-size: 17px; margin-bottom: 14px; outline: none; }
@@ -46,6 +56,7 @@
     .add-msg { margin-top: 12px; text-align: center; font-size: 15px; }
     .add-msg.ok { color: #009246; }
     .add-msg.err { color: #CE2B37; }
+
     .deck-top { display: flex; gap: 10px; margin-bottom: 16px; }
     .search-box { flex: 1; padding: 11px 13px; border: 0.5px solid #ddd; border-radius: 12px; font-size: 15px; outline: none; background: #fff; }
     .search-box:focus { border-color: #009246; }
@@ -61,15 +72,21 @@
     .btn-export { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 15px; font-weight: 500; cursor: pointer; }
     .btn-import { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #888; background: transparent; color: #888; font-size: 15px; font-weight: 500; cursor: pointer; }
     .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: #ccc; padding: 6px 0 8px; background: #f5f5f0; }
-    /* Modal */
+
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
     .modal { background: #fff; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; }
     .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
     .modal-desc { font-size: 13px; color: #aaa; margin-bottom: 16px; line-height: 1.4; }
-    .modal-option { width: 100%; padding: 13px 16px; border-radius: 12px; border: 1.5px solid #ddd; background: transparent; color: #222; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; text-align: left; transition: background 0.15s; }
+    .modal-option { width: 100%; padding: 13px 16px; border-radius: 12px; border: 1.5px solid #ddd; background: transparent; color: #222; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; text-align: left; transition: background 0.15s, color 0.15s; }
     .modal-option:hover { background: #f5f5f0; }
-    .modal-option.neutral { color: #888; font-weight: 400; border-color: #eee; font-size: 15px; }
+    .modal-option.neutral { color: #888; font-weight: 400; border-color: #ccc; font-size: 15px; }
     .modal-option.danger { color: #CE2B37; border-color: #CE2B37; }
+    .modal-option.sideline { border-color: #2B7FCE; color: #2B7FCE; }
+    .modal-option.priority { border-color: #E08A1E; color: #E08A1E; }
+    .modal-option.flash-blue { background: #2B7FCE; color: #fff; }
+    .modal-option.flash-orange { background: #E08A1E; color: #fff; }
+    .modal-option.flash-grey { background: #888; color: #fff; }
+    .modal-option.flash-red { background: #CE2B37; color: #fff; }
     .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
     .btn-cancel { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #ddd; background: transparent; color: #888; font-size: 15px; cursor: pointer; }
     .btn-save { flex: 1; padding: 12px 0; border-radius: 12px; border: none; background: #009246; color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; }
@@ -82,9 +99,9 @@
 <input type="file" id="import-input" accept=".json" style="display:none" onchange="importCards(event)" />
 
 <script>
-const EMOJI_MAP = {
+var EMOJI_MAP = {
   "chat":"🐱","chien":"🐶","cheval":"🐴","vache":"🐮","mouton":"🐑","cochon":"🐷","poule":"🐔","canard":"🦆","lapin":"🐰","souris":"🐭","poisson":"🐟","dauphin":"🐬","baleine":"🐳","lion":"🦁","tigre":"🐯","ours":"🐻","singe":"🐒","elephant":"🐘","girafe":"🦒","zebre":"🦓","serpent":"🐍","grenouille":"🐸","oiseau":"🐦","aigle":"🦅","hibou":"🦉","pingouin":"🐧","abeille":"🐝","papillon":"🦋","araignee":"🕷️","fourmi":"🐜",
-  "pomme":"🍎","banane":"🍌","orange":"🍊","citron":"🍋","fraise":"🍓","cerise":"🍒","raisin":"🍇","peche":"🍑","poire":"🍐","ananas":"🍍","melon":"🍈","pasteque":"🍉","mangue":"🥭","kiwi":"🥝","tomate":"🍅","carotte":"🥕","mais":"🌽","brocoli":"🥦","salade":"🥬","aubergine":"🍆","patate":"🥔","pomme de terre":"🥔","oignon":"🧅","ail":"🧄","champignon":"🍄","pain":"🍞","pizza":"🍕","burger":"🍔","frites":"🍟","sushi":"🍣","pates":"🍝","riz":"🍚","soupe":"🍜","gateau":"🎂","glace":"🍦","chocolat":"🍫","bonbon":"🍬","cafe":"☕","the":"🍵","eau":"💧","lait":"🥛","jus":"🧃","biere":"🍺","vin":"🍷",
+  "pomme":"🍎","banane":"🍌","orange":"🍊","citron":"🍋","fraise":"🍓","cerise":"🍒","raisin":"🍇","peche":"🍑","poire":"🍐","ananas":"🍍","melon":"🍈","pasteque":"🍉","mangue":"🥭","kiwi":"🥝","tomate":"🍅","carotte":"🥕","mais":"🌽","brocoli":"🥦","salade":"🥬","aubergine":"🍆","patate":"🥔","oignon":"🧅","ail":"🧄","champignon":"🍄","pain":"🍞","pizza":"🍕","burger":"🍔","frites":"🍟","sushi":"🍣","pates":"🍝","riz":"🍚","soupe":"🍜","gateau":"🎂","glace":"🍦","chocolat":"🍫","bonbon":"🍬","cafe":"☕","the":"🍵","eau":"💧","lait":"🥛","jus":"🧃","biere":"🍺","vin":"🍷",
   "maison":"🏠","appartement":"🏢","ecole":"🏫","hopital":"🏥","eglise":"⛪","chateau":"🏰","tour":"🗼","pont":"🌉","plage":"🏖️","montagne":"⛰️","foret":"🌲","desert":"🏜️","ile":"🏝️","mer":"🌊","riviere":"🏞️","volcan":"🌋","ville":"🏙️",
   "voiture":"🚗","camion":"🚚","bus":"🚌","velo":"🚲","moto":"🏍️","train":"🚂","avion":"✈️","bateau":"⛵","fusee":"🚀","helicoptere":"🚁","ambulance":"🚑","taxi":"🚕","trottinette":"🛴","metro":"🚇",
   "balais":"🧹","aspirateur":"🧹","savon":"🧼","shampooing":"🧴","miroir":"🪞","fenetre":"🪟","porte":"🚪","lit":"🛏️","canape":"🛋️","chaise":"🪑","escalier":"🪜",
@@ -99,12 +116,12 @@ const EMOJI_MAP = {
 
 function findEmoji(fr) {
   if (!fr) return null;
-  const clean = fr.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  var clean = fr.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   if (EMOJI_MAP[clean]) return EMOJI_MAP[clean];
-  const noArticle = clean.replace(/^(le |la |l'|l'|les |un |une |des )/, "").trim();
+  var noArticle = clean.replace(/^(le |la |l'|l’|les |un |une |des )/, "").trim();
   if (EMOJI_MAP[noArticle]) return EMOJI_MAP[noArticle];
-  for (const key of Object.keys(EMOJI_MAP)) {
-    if (noArticle === key || noArticle.includes(key)) return EMOJI_MAP[key];
+  for (var key in EMOJI_MAP) {
+    if (noArticle === key || noArticle.indexOf(key) !== -1) return EMOJI_MAP[key];
   }
   return null;
 }
@@ -114,7 +131,7 @@ function cleanEmoji(val) {
   return val;
 }
 
-const INITIAL_CARDS = [
+var INITIAL_CARDS = [
   { id: 1, fr: "le chat", it: "il gatto", emoji: "🐱" },
   { id: 2, fr: "le chien", it: "il cane", emoji: "🐶" },
   { id: 3, fr: "la maison", it: "la casa", emoji: "🏠" },
@@ -134,20 +151,20 @@ const INITIAL_CARDS = [
   { id: 17, fr: "l'œil", it: "l'occhio", emoji: "👁️" },
   { id: 18, fr: "le cœur", it: "il cuore", emoji: "❤️" },
   { id: 19, fr: "l'arbre", it: "l'albero", emoji: "🌳" },
-  { id: 20, fr: "l'oiseau", it: "l'uccello", emoji: "🐦" },
+  { id: 20, fr: "l'oiseau", it: "l'uccello", emoji: "🐦" }
 ];
 
-let raw = JSON.parse(localStorage.getItem("fc_cards") || "null") || INITIAL_CARDS;
-let cards = raw.map(c => ({ ...c, emoji: cleanEmoji(c.emoji) }));
-let scores = JSON.parse(localStorage.getItem("fc_scores") || "{}");
-let nextId = Math.max(...cards.map(c => c.id)) + 1;
-let deck = [], idx = 0, flipped = false;
-let sessionRight = 0, sessionWrong = 0;
-let view = "study";
-let pressTimer = null;
-let btnPressTimer = null;
-let lastCardId = null;
-let searchQuery = "";
+var raw = JSON.parse(localStorage.getItem("fc_cards") || "null") || INITIAL_CARDS;
+var cards = raw.map(function(c) { return Object.assign({}, c, { emoji: cleanEmoji(c.emoji) }); });
+var scores = JSON.parse(localStorage.getItem("fc_scores") || "{}");
+var nextId = Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1;
+var deck = [], idx = 0, flipped = false;
+var sessionRight = 0, sessionWrong = 0;
+var view = "study";
+var pressTimer = null;
+var btnPressTimer = null;
+var lastCardId = null;
+var searchQuery = "";
 
 function save() {
   localStorage.setItem("fc_cards", JSON.stringify(cards));
@@ -156,251 +173,226 @@ function save() {
 save();
 
 function isCardActive(c) {
-  const s = scores[c.id];
+  var s = scores[c.id];
   if (!s) return true;
   if (s.sidelined && Date.now() < s.sidelined) return false;
   return true;
 }
 
 function buildDeck() {
-  const n = cards.length;
-  const d = [];
-  cards.forEach((c, i) => {
+  var n = cards.length;
+  var d = [];
+  cards.forEach(function(c, i) {
     if (!isCardActive(c)) return;
-    const s = scores[c.id] || { right: 0, wrong: 0 };
-    let w = Math.max(1, 1 + (s.wrong||0) * 2 - (s.right||0));
-    // Priorité manuelle
+    var s = scores[c.id] || { right: 0, wrong: 0 };
+    var w = Math.max(1, 1 + (s.wrong||0) * 2 - (s.right||0));
     if (s.priority && Date.now() < s.priority) w *= 3;
-    // Bonus nouveauté
-    const rank = n - i;
+    var rank = n - i;
     if (rank <= 10) w *= 3;
     else if (rank <= 30) w *= 2;
-    for (let j = 0; j < w; j++) d.push({ ...c, reversed: Math.random() < 0.2 });
+    for (var j = 0; j < w; j++) d.push(Object.assign({}, c, { reversed: Math.random() < 0.2 }));
   });
-  for (let i = d.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [d[i], d[j]] = [d[j], d[i]];
+  for (var i2 = d.length - 1; i2 > 0; i2--) {
+    var j2 = Math.floor(Math.random() * (i2 + 1));
+    var tmp = d[i2]; d[i2] = d[j2]; d[j2] = tmp;
   }
   deck = d; idx = 0; flipped = false;
 }
 
 function render() {
-  const root = document.getElementById("root");
-  const total = sessionRight + sessionWrong;
-  const pct = total ? Math.round(sessionRight / total * 100) : null;
-  const card = deck[idx];
+  var root = document.getElementById("root");
+  var total = sessionRight + sessionWrong;
+  var pct = total ? Math.round(sessionRight / total * 100) : null;
+  var card = deck[idx];
 
-  let html = `<h2>🇮🇹 Flashcards Italien</h2>
-  <p class="subtitle">Français → Italien</p>
-  <div class="tabs">
-    <button class="tab ${view==='study'?'active':''}" onclick="setView('study')">Étudier</button>
-    <button class="tab ${view==='add'?'active':''}" onclick="setView('add')">Ajouter</button>
-    <button class="tab ${view==='stats'?'active':''}" onclick="setView('stats')">Deck</button>
-  </div>`;
+  var html = "";
+  html += "<h2>🇮🇹 Flashcards Italien</h2>";
+  html += "<p class='subtitle'>Français → Italien</p>";
+  html += "<div class='tabs'>";
+  html += "<button class='tab " + (view==="study"?"active":"") + "' onclick=\"setView('study')\">Étudier</button>";
+  html += "<button class='tab " + (view==="add"?"active":"") + "' onclick=\"setView('add')\">Ajouter</button>";
+  html += "<button class='tab " + (view==="stats"?"active":"") + "' onclick=\"setView('stats')\">Deck</button>";
+  html += "</div>";
 
   if (view === "study") {
-    html += `<div class="session-bar">
-      <span>Session : ${total} cartes</span>
-      <span style="color:${pct===null?'#888':pct>=70?'#009246':'#CE2B37'}">${pct===null?"Commence !":pct+"% réussi"}</span>
-    </div>`;
+    html += "<div class='session-bar'>";
+    html += "<span>Session : " + total + " cartes</span>";
+    html += "<span style='color:" + (pct===null?"#888":(pct>=70?"#009246":"#CE2B37")) + "'>" + (pct===null?"Commence !":pct+"% réussi") + "</span>";
+    html += "</div>";
+
     if (card) {
-      const front = card.reversed ? card.it : card.fr;
-      const back  = card.reversed ? card.fr : card.it;
-      const lang  = card.reversed ? "🇮🇹 → 🇫🇷" : "🇫🇷 → 🇮🇹";
-      const e = card.emoji;
-      html += `<div class="card-wrap" onclick="flipCard()">
-        <div class="card-inner ${flipped?'flipped':''}">
-          <div class="card-face card-front">
-            ${e ? `<div class="card-emoji">${e}</div>` : ""}
-            <div class="card-word">${front}</div>
-            <div class="card-lang">${lang}</div>
-            <div class="card-hint">Cliquer pour retourner</div>
-          </div>
-          <div class="card-face card-back">
-            ${e ? `<div class="card-emoji">${e}</div>` : ""}
-            <div class="card-word" style="color:#222;">${back}</div>
-            <div class="card-sub" style="color:#555;">${front}</div>
-          </div>
-        </div>
-      </div>
-      <div id="answer-btns" class="answer-btns" style="display:${flipped?'flex':'none'}">
-        <button class="btn-wrong" id="btn-wrong"
-          onclick="flashBtn('btn-wrong', false)"
-          onmousedown="startBtnPress('wrong')" onmouseup="cancelBtnPress()" onmouseleave="cancelBtnPress()"
-          ontouchstart="startBtnPress('wrong')" ontouchend="cancelBtnPress()" ontouchcancel="cancelBtnPress()">
-          ✗ À revoir
-        </button>
-        <button class="btn-right" id="btn-right"
-          onclick="flashBtn('btn-right', true)"
-          onmousedown="startBtnPress('right')" onmouseup="cancelBtnPress()" onmouseleave="cancelBtnPress()"
-          ontouchstart="startBtnPress('right')" ontouchend="cancelBtnPress()" ontouchcancel="cancelBtnPress()">
-          ✓ Je savais
-        </button>
-      </div>
-      <p class="btn-hint">Appui long sur un bouton pour plus d'options</p>
-      <p id="card-count" class="card-count" style="display:${flipped?'none':'block'}">${deck.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).length} cartes actives</p>`;
+      var front = card.reversed ? card.it : card.fr;
+      var back  = card.reversed ? card.fr : card.it;
+      var lang  = card.reversed ? "🇮🇹 → 🇫🇷" : "🇫🇷 → 🇮🇹";
+      var e = card.emoji;
+
+      html += "<div class='card-wrap' onclick='flipCard()'>";
+      html += "<div class='card-inner " + (flipped?"flipped":"") + "'>";
+      html += "<div class='card-face card-front'>";
+      if (e) html += "<div class='card-emoji'>" + e + "</div>";
+      html += "<div class='card-word'>" + front + "</div>";
+      html += "<div class='card-lang'>" + lang + "</div>";
+      html += "<div class='card-hint'>Cliquer pour retourner</div>";
+      html += "</div>";
+      html += "<div class='card-face card-back'>";
+      if (e) html += "<div class='card-emoji'>" + e + "</div>";
+      html += "<div class='card-word'>" + back + "</div>";
+      html += "<div class='card-sub'>" + front + "</div>";
+      html += "</div>";
+      html += "</div>";
+      html += "</div>";
+
+      html += "<div id='answer-btns' class='answer-btns' style='display:" + (flipped?"flex":"none") + "'>";
+      html += "<button class='btn-wrong' id='btn-wrong' onclick=\"flashBtn('btn-wrong', false)\" onmousedown='startBtnPress()' onmouseup='cancelBtnPress()' onmouseleave='cancelBtnPress()' ontouchstart='startBtnPress()' ontouchend='cancelBtnPress()' ontouchcancel='cancelBtnPress()'>✗ À revoir</button>";
+      html += "<button class='btn-right' id='btn-right' onclick=\"flashBtn('btn-right', true)\" onmousedown='startBtnPress()' onmouseup='cancelBtnPress()' onmouseleave='cancelBtnPress()' ontouchstart='startBtnPress()' ontouchend='cancelBtnPress()' ontouchcancel='cancelBtnPress()'>✓ Je savais</button>";
+      html += "</div>";
+      html += "<p class='btn-hint'>Appui long sur un bouton pour plus d'options</p>";
+
+      var activeCount = 0;
+      for (var k=0;k<cards.length;k++) if (isCardActive(cards[k])) activeCount++;
+      html += "<p id='card-count' class='card-count' style='display:" + (flipped?"none":"block") + "'>" + activeCount + " cartes actives</p>";
     } else {
-      html += `<p style="text-align:center;padding:3rem 0;color:#888">Aucune carte disponible.</p>`;
+      html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte disponible.</p>";
     }
   }
 
   if (view === "add") {
-    html += `<div class="form-card">
-      <label class="form-label">Mot en français</label>
-      <input class="form-input" id="inp-fr" placeholder="ex : le vélo" />
-      <label class="form-label">Traduction italienne</label>
-      <input class="form-input" id="inp-it" placeholder="ex : la bicicletta" onkeydown="if(event.key==='Enter')addCard()" />
-      <button class="btn-add" onclick="addCard()">Ajouter la carte</button>
-      <div id="add-msg" class="add-msg"></div>
-    </div>`;
+    html += "<div class='form-card'>";
+    html += "<label class='form-label'>Mot en français</label>";
+    html += "<input class='form-input' id='inp-fr' placeholder='ex : le vélo' />";
+    html += "<label class='form-label'>Traduction italienne</label>";
+    html += "<input class='form-input' id='inp-it' placeholder='ex : la bicicletta' onkeydown=\"if(event.key==='Enter')addCard()\" />";
+    html += "<button class='btn-add' onclick='addCard()'>Ajouter la carte</button>";
+    html += "<div id='add-msg' class='add-msg'></div>";
+    html += "</div>";
   }
 
   if (view === "stats") {
-    const filtered = searchQuery
-      ? cards.filter(c => c.fr.toLowerCase().includes(searchQuery.toLowerCase()) || c.it.toLowerCase().includes(searchQuery.toLowerCase()))
-      : cards;
+    var filtered = cards;
+    if (searchQuery) {
+      var q = searchQuery.toLowerCase();
+      filtered = cards.filter(function(c) {
+        return c.fr.toLowerCase().indexOf(q) !== -1 || c.it.toLowerCase().indexOf(q) !== -1;
+      });
+    }
 
-    html += `<div class="deck-top">
-      <input class="search-box" id="search-input" placeholder="🔍 Rechercher un mot..." value="${searchQuery}" oninput="updateSearch(this.value)" />
-      <div class="stat-card-single"><div class="stat-label">Cartes</div><div class="stat-val">${cards.length}</div></div>
-    </div>
-    <div class="export-btns" style="margin-bottom:16px">
-      <button class="btn-export" onclick="exportCards()">⬇ Exporter</button>
-      <button class="btn-import" onclick="document.getElementById('import-input').click()">⬆ Importer</button>
-    </div>
-    <div class="stats-list"><p class="stats-title">Cartes dans le deck <span style="font-size:12px;color:#aaa;font-weight:400">(appui long pour modifier)</span></p>`;
+    html += "<div class='deck-top'>";
+    html += "<input class='search-box' id='search-input' placeholder='🔍 Rechercher un mot...' value=\"" + searchQuery.replace(/"/g,"&quot;") + "\" oninput='updateSearch(this.value)' />";
+    html += "<div class='stat-card-single'><div class='stat-label'>Cartes</div><div class='stat-val'>" + cards.length + "</div></div>";
+    html += "</div>";
 
-    filtered.forEach(c => {
-      const s = scores[c.id] || { history: [] };
-      const hist = (s.history || []).slice(-5);
-      const dots = [];
-      for (let i = 0; i < 5; i++) dots.push(i < hist.length ? (hist[i] ? '#009246' : '#CE2B37') : '#ddd');
-      const dotsHtml = dots.map(col => `<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${col};margin-left:3px"></span>`).join('');
-      const isSidelined = s.sidelined && Date.now() < s.sidelined;
-      const isPriority = s.priority && Date.now() < s.priority;
-      const badge = isSidelined ? ' 💤' : isPriority ? ' 🔥' : '';
-      html += `<div class="stat-row">
-        <span class="stat-row-word"
-          onmousedown="startPress(${c.id})" onmouseup="cancelPress()" onmouseleave="cancelPress()"
-          ontouchstart="startPress(${c.id})" ontouchend="cancelPress()" ontouchcancel="cancelPress()">
-          ${c.fr} → ${c.it}${badge}
-        </span>
-        <span style="white-space:nowrap">${dotsHtml}</span>
-        <button onclick="deleteCard(${c.id})" style="background:none;border:none;cursor:pointer;font-size:16px;padding:2px 4px;color:#ccc">🗑️</button>
-      </div>`;
+    html += "<div class='export-btns' style='margin-bottom:16px'>";
+    html += "<button class='btn-export' onclick='exportCards()'>⬇ Exporter</button>";
+    html += "<button class='btn-import' onclick=\"document.getElementById('import-input').click()\">⬆ Importer</button>";
+    html += "</div>";
+
+    html += "<div class='stats-list'><p class='stats-title'>Cartes dans le deck <span style='font-size:12px;color:#aaa;font-weight:400'>(appui long pour modifier)</span></p>";
+
+    filtered.forEach(function(c) {
+      var s = scores[c.id] || {};
+      var hist = (s.history || []).slice(-5);
+      var dotsHtml = "";
+      for (var di = 0; di < 5; di++) {
+        var col = di < hist.length ? (hist[di] ? "#009246" : "#CE2B37") : "#ddd";
+        dotsHtml += "<span style='display:inline-block;width:11px;height:11px;border-radius:50%;background:" + col + ";margin-left:3px'></span>";
+      }
+      var isSidelined = s.sidelined && Date.now() < s.sidelined;
+      var isPriority = s.priority && Date.now() < s.priority;
+      var badge = isSidelined ? " 💤" : (isPriority ? " 🔥" : "");
+
+      html += "<div class='stat-row'>";
+      html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + c.fr + " → " + c.it + badge + "</span>";
+      html += "<span style='white-space:nowrap'>" + dotsHtml + "</span>";
+      html += "<button onclick='deleteCard(" + c.id + ")' style='background:none;border:none;cursor:pointer;font-size:16px;padding:2px 4px;color:#ccc'>🗑️</button>";
+      html += "</div>";
     });
 
-    if (filtered.length === 0) html += `<p style="text-align:center;color:#aaa;font-size:14px;padding:1rem 0">Aucun résultat</p>`;
+    if (filtered.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>Aucun résultat</p>";
 
-    html += `</div>`;
+    html += "</div>";
   }
 
   root.innerHTML = html;
+
+  if (view === "stats") {
+    var inp = document.getElementById("search-input");
+    if (inp) {
+      inp.focus();
+      var len = inp.value.length;
+      inp.setSelectionRange(len, len);
+    }
+  }
 }
 
 function updateSearch(val) {
   searchQuery = val;
   render();
-  // Remet le focus sur le champ après re-render
-  const inp = document.getElementById('search-input');
-  if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
 }
 
 function setView(v) { searchQuery = ""; view = v; render(); }
 
 function flipCard() {
   flipped = !flipped;
-  const inner = document.querySelector('.card-inner');
+  var inner = document.querySelector(".card-inner");
+  var btns = document.getElementById("answer-btns");
+  var count = document.getElementById("card-count");
   if (inner) {
     if (flipped) {
-      inner.classList.add('flipped');
-      document.getElementById('answer-btns').style.display = 'flex';
-      document.getElementById('card-count').style.display = 'none';
+      inner.classList.add("flipped");
+      if (btns) btns.style.display = "flex";
+      if (count) count.style.display = "none";
     } else {
-      inner.classList.remove('flipped');
-      document.getElementById('answer-btns').style.display = 'none';
-      document.getElementById('card-count').style.display = 'block';
+      inner.classList.remove("flipped");
+      if (btns) btns.style.display = "none";
+      if (count) count.style.display = "block";
     }
   }
 }
 
-// Appui long sur les boutons réponse
-function startBtnPress(type) {
-  btnPressTimer = setTimeout(() => {
-    cancelBtnPress();
-    openAnswerModal(type);
+function startBtnPress() {
+  btnPressTimer = setTimeout(function() {
+    btnPressTimer = "long";
+    showAnswerOptions();
   }, 600);
 }
-function cancelBtnPress() { clearTimeout(btnPressTimer); }
 
-function openAnswerModal(type) {
-  const card = deck[idx];
-  if (!card) return;
-  const modal = document.getElementById('modal-container');
-  if (type === 'right') {
-    modal.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
-      <h3>✓ Je savais</h3>
-      <p class="modal-desc">💤 Les cartes mises de côté disparaissent pendant 1 mois, puis reviennent automatiquement.</p>
-      <button class="modal-option" onclick="sidelineCard(${card.id})">Mettre de côté 1 mois</button>
-      <button class="modal-option danger" onclick="deleteCardAndNext(${card.id})">Supprimer la carte du deck</button>
-      <button class="modal-option neutral" onclick="closeModal()">Continuer normalement</button>
-    </div></div>`;
-  } else {
-    modal.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
-      <h3>✗ À revoir</h3>
-      <p class="modal-desc">🔥 Les cartes en priorité maximale apparaissent 3× plus souvent pendant 7 jours.</p>
-      <button class="modal-option" onclick="prioritizeCard(${card.id})">Priorité maximale 7 jours</button>
-      <button class="modal-option danger" onclick="deleteCardAndNext(${card.id})">Supprimer la carte du deck</button>
-      <button class="modal-option neutral" onclick="closeModal()">Continuer normalement</button>
-    </div></div>`;
-  }
-}
-
-function sidelineCard(id) {
-  const prev = scores[id] || { right: 0, wrong: 0, history: [] };
-  scores[id] = { ...prev, sidelined: Date.now() + 30 * 24 * 60 * 60 * 1000 };
-  save(); buildDeck(); closeModal(); render();
-}
-
-function prioritizeCard(id) {
-  const prev = scores[id] || { right: 0, wrong: 0, history: [] };
-  scores[id] = { ...prev, priority: Date.now() + 7 * 24 * 60 * 60 * 1000 };
-  save(); buildDeck(); closeModal(); render();
-}
-
-function deleteCardAndNext(id) {
-  cards = cards.filter(c => c.id !== id);
-  delete scores[id];
-  save(); buildDeck(); closeModal(); render();
+function cancelBtnPress() {
+  if (btnPressTimer !== "long") clearTimeout(btnPressTimer);
 }
 
 function flashBtn(id, correct) {
-  // Si l'appui long est en cours, ne pas déclencher le clic normal
-  if (btnPressTimer === null) return;
+  if (btnPressTimer === "long") {
+    btnPressTimer = null;
+    return;
+  }
   clearTimeout(btnPressTimer);
   btnPressTimer = null;
-  const btn = document.getElementById(id);
-  const cardInner = document.querySelector('.card-inner');
-  if (btn) btn.classList.add('flash');
+  var btn = document.getElementById(id);
+  var cardInner = document.querySelector(".card-inner");
+  if (btn) btn.classList.add("flash");
   if (cardInner) {
-    cardInner.style.outline = correct ? '3px solid #009246' : '3px solid #CE2B37';
-    cardInner.style.boxShadow = correct ? '0 0 0 5px rgba(0,146,70,0.25)' : '0 0 0 5px rgba(206,43,55,0.25)';
-    cardInner.style.borderRadius = '16px';
+    cardInner.style.outline = correct ? "3px solid #009246" : "3px solid #CE2B37";
+    cardInner.style.boxShadow = correct ? "0 0 0 5px rgba(0,146,70,0.25)" : "0 0 0 5px rgba(206,43,55,0.25)";
+    cardInner.style.borderRadius = "16px";
   }
-  setTimeout(() => answer(correct), 350);
+  setTimeout(function() { answer(correct); }, 350);
 }
 
 function answer(correct) {
-  const card = deck[idx];
+  var card = deck[idx];
   if (!card) return;
   lastCardId = card.id;
-  const prev = scores[card.id] || { right: 0, wrong: 0, history: [] };
-  const history = [...(prev.history || []), correct].slice(-10);
-  scores[card.id] = { ...prev, right: correct ? (prev.right||0)+1 : (prev.right||0), wrong: !correct ? (prev.wrong||0)+1 : (prev.wrong||0), history };
+  var prev = scores[card.id] || { right: 0, wrong: 0, history: [] };
+  var history = (prev.history || []).concat([correct]).slice(-10);
+  scores[card.id] = Object.assign({}, prev, {
+    right: correct ? (prev.right||0)+1 : (prev.right||0),
+    wrong: !correct ? (prev.wrong||0)+1 : (prev.wrong||0),
+    history: history
+  });
   if (correct) sessionRight++; else sessionWrong++;
   save(); buildDeck();
-  let newIdx = Math.floor(Math.random() * Math.min(deck.length, 5));
-  let tries = 0;
+  var newIdx = Math.floor(Math.random() * Math.min(deck.length, 5));
+  var tries = 0;
   while (deck[newIdx] && deck[newIdx].id === lastCardId && tries < 10) {
     newIdx = Math.floor(Math.random() * Math.min(deck.length, 5));
     tries++;
@@ -410,92 +402,127 @@ function answer(correct) {
 }
 
 function addCard() {
-  const frEl = document.getElementById("inp-fr");
-  const itEl = document.getElementById("inp-it");
-  const msg  = document.getElementById("add-msg");
-  const fr = frEl.value.trim(), it = itEl.value.trim();
+  var frEl = document.getElementById("inp-fr");
+  var itEl = document.getElementById("inp-it");
+  var msg  = document.getElementById("add-msg");
+  var fr = frEl.value.trim(), it = itEl.value.trim();
   if (!fr || !it) { msg.className = "add-msg err"; msg.textContent = "Remplis les deux champs."; return; }
-  cards.push({ id: nextId++, fr, it, emoji: null });
+  cards.push({ id: nextId++, fr: fr, it: it, emoji: null });
   save(); buildDeck();
   frEl.value = ""; itEl.value = "";
   msg.className = "add-msg ok";
-  msg.textContent = `Carte "${fr}" ajoutée !`;
+  msg.textContent = "Carte \"" + fr + "\" ajoutée !";
 }
 
 function deleteCard(id) {
   if (!confirm("Supprimer cette carte ?")) return;
-  cards = cards.filter(c => c.id !== id);
+  cards = cards.filter(function(c){ return c.id !== id; });
   delete scores[id];
   save(); buildDeck(); render();
 }
 
-// Appui long pour modifier dans le Deck
 function startPress(id) {
-  pressTimer = setTimeout(() => openEditModal(id), 600);
+  pressTimer = setTimeout(function(){ openEditModal(id); }, 600);
 }
 function cancelPress() { clearTimeout(pressTimer); }
 
 function openEditModal(id) {
-  const c = cards.find(x => x.id === id);
+  var c = cards.find(function(x){ return x.id === id; });
   if (!c) return;
-  const modal = document.getElementById('modal-container');
-  modal.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
-    <h3>✏️ Modifier la carte</h3>
-    <label class="form-label">Mot en français</label>
-    <input class="form-input" id="edit-fr" value="${c.fr}" />
-    <label class="form-label">Traduction italienne</label>
-    <input class="form-input" id="edit-it" value="${c.it}" />
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
-      <button class="btn-save" onclick="saveEdit(${id})">Enregistrer</button>
-    </div>
-  </div></div>`;
+  var modal = document.getElementById("modal-container");
+  modal.innerHTML =
+    "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
+    "<h3>✏️ Modifier la carte</h3>" +
+    "<label class='form-label'>Mot en français</label>" +
+    "<input class='form-input' id='edit-fr' value=\"" + c.fr.replace(/"/g,"&quot;") + "\" />" +
+    "<label class='form-label'>Traduction italienne</label>" +
+    "<input class='form-input' id='edit-it' value=\"" + c.it.replace(/"/g,"&quot;") + "\" />" +
+    "<div class='modal-btns'>" +
+    "<button class='btn-cancel' onclick='closeModal()'>Annuler</button>" +
+    "<button class='btn-save' onclick='saveEdit(" + id + ")'>Enregistrer</button>" +
+    "</div></div></div>";
 }
 
-function closeModal() { document.getElementById('modal-container').innerHTML = ''; }
+function closeModal() { document.getElementById("modal-container").innerHTML = ""; }
 
 function saveEdit(id) {
-  const fr = document.getElementById('edit-fr').value.trim();
-  const it = document.getElementById('edit-it').value.trim();
+  var fr = document.getElementById("edit-fr").value.trim();
+  var it = document.getElementById("edit-it").value.trim();
   if (!fr || !it) return;
-  const i = cards.findIndex(c => c.id === id);
+  var i = cards.findIndex(function(c){ return c.id === id; });
   if (i === -1) return;
-  cards[i] = { ...cards[i], fr, it };
+  cards[i] = Object.assign({}, cards[i], { fr: fr, it: it });
+  save(); buildDeck(); closeModal(); render();
+}
+
+function showAnswerOptions() {
+  var card = deck[idx];
+  if (!card) return;
+  var cardId = card.id;
+  var modal = document.getElementById("modal-container");
+  modal.innerHTML =
+    "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
+    "<h3>Options pour cette carte</h3>" +
+    "<p class='modal-desc'>Mettre de côté : la carte disparaît du deck pendant 1 mois, puis revient automatiquement.<br>Priorité maximale : la carte apparaît 3× plus souvent pendant 7 jours.</p>" +
+    "<button class='modal-option sideline' id='opt-sideline' onclick=\"flashOption('opt-sideline','flash-blue', function(){ sidelineCard(" + cardId + "); })\">Mettre de côté 1 mois 💤</button>" +
+    "<button class='modal-option priority' id='opt-priority' onclick=\"flashOption('opt-priority','flash-orange', function(){ prioritizeCard(" + cardId + "); })\">Priorité maximale 7 jours 🔥</button>" +
+    "<button class='modal-option danger' id='opt-delete' onclick=\"flashOption('opt-delete','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">Supprimer la carte du deck</button>" +
+    "<button class='modal-option neutral' id='opt-cancel' onclick=\"flashOption('opt-cancel','flash-grey', function(){ closeModal(); })\">Continuer normalement</button>" +
+    "</div></div>";
+}
+
+function flashOption(id, flashClass, callback) {
+  var btn = document.getElementById(id);
+  if (btn) btn.classList.add(flashClass);
+  setTimeout(callback, 350);
+}
+
+function sidelineCard(id) {
+  var prev = scores[id] || { right: 0, wrong: 0, history: [] };
+  scores[id] = Object.assign({}, prev, { sidelined: Date.now() + 30 * 24 * 60 * 60 * 1000 });
+  save(); buildDeck(); closeModal(); render();
+}
+
+function prioritizeCard(id) {
+  var prev = scores[id] || { right: 0, wrong: 0, history: [] };
+  scores[id] = Object.assign({}, prev, { priority: Date.now() + 7 * 24 * 60 * 60 * 1000 });
+  save(); buildDeck(); closeModal(); render();
+}
+
+function deleteCardAndNext(id) {
+  cards = cards.filter(function(c){ return c.id !== id; });
+  delete scores[id];
   save(); buildDeck(); closeModal(); render();
 }
 
 function exportCards() {
-  const data = { cards, scores };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'flashcards-italien.json'; a.click();
+  var data = { cards: cards, scores: scores };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = "flashcards-italien.json"; a.click();
   URL.revokeObjectURL(url);
 }
 
 function importCards(e) {
-  const file = e.target.files[0];
+  var file = e.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
+  var reader = new FileReader();
+  reader.onload = function(ev) {
     try {
-      const data = JSON.parse(ev.target.result);
+      var data = JSON.parse(ev.target.result);
       if (data.cards && Array.isArray(data.cards)) {
-        cards = data.cards.map(c => ({ ...c, emoji: cleanEmoji(c.emoji) }));
+        cards = data.cards.map(function(c){ return Object.assign({}, c, { emoji: cleanEmoji(c.emoji) }); });
         scores = data.scores || {};
-        nextId = Math.max(...cards.map(c => c.id)) + 1;
+        nextId = Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1;
         save(); buildDeck(); render();
-        alert(`${cards.length} cartes importées avec succès !`);
-      } else { alert('Fichier invalide.'); }
-    } catch { alert('Erreur lors de la lecture du fichier.'); }
+        alert(cards.length + " cartes importées avec succès !");
+      } else { alert("Fichier invalide."); }
+    } catch (err) { alert("Erreur lors de la lecture du fichier."); }
   };
   reader.readAsText(file);
-  e.target.value = '';
+  e.target.value = "";
 }
-
-// Correction du bug flashBtn : reset btnPressTimer après cancelBtnPress
-const _cancelBtnPress = cancelBtnPress;
-window.cancelBtnPress = function() { _cancelBtnPress(); btnPressTimer = 1; };
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 buildDeck();

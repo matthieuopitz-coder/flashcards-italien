@@ -13,7 +13,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #f5f5f0; min-height: 100vh; }
-    #root { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem; }
+    #root { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem 3rem 1rem; }
     h2 { text-align: center; font-size: 22px; font-weight: 500; margin-bottom: 4px; }
     .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 20px; }
     .tabs { display: flex; justify-content: center; gap: 6px; margin-bottom: 24px; }
@@ -23,19 +23,19 @@
     .card-wrap { perspective: 1000px; cursor: pointer; height: 270px; margin-bottom: 20px; }
     .card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.5s; border-radius: 16px; }
     .card-inner.flipped { transform: rotateY(180deg); }
-    .card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 1rem; }
-    .card-front { background: #fff; border: 2.5px solid #ddd; transition: border-color 0.15s; }
-    .card-back { background: #fff; border: 2.5px solid #ddd; transform: rotateY(180deg); }
+    .card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 1.2rem; }
+    .card-front { background: #fff; border: 2.5px solid #ddd; }
     .card-emoji { font-size: 56px; }
-    .card-word { font-size: 36px; font-weight: 600; text-align: center; }
-    .card-sub { font-size: 24px; font-weight: 400; text-align: center; }
+    .card-word { font-size: 36px; font-weight: 600; text-align: center; word-break: break-word; hyphens: auto; max-width: 100%; line-height: 1.2; }
+    .card-sub { font-size: 22px; font-weight: 400; text-align: center; word-break: break-word; max-width: 100%; line-height: 1.2; }
     .card-lang { font-size: 26px; letter-spacing: 4px; }
     .card-hint { font-size: 13px; color: #bbb; margin-top: 2px; }
-    .answer-btns { display: flex; gap: 12px; }
-    .btn-wrong { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #CE2B37; background: transparent; color: #CE2B37; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; }
+    .answer-btns { display: flex; gap: 12px; margin-bottom: 6px; }
+    .btn-wrong { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #CE2B37; background: transparent; color: #CE2B37; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
     .btn-wrong.flash { background: #CE2B37; color: #fff; }
-    .btn-right { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; }
+    .btn-right { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
     .btn-right.flash { background: #009246; color: #fff; }
+    .btn-hint { text-align: center; font-size: 11px; color: #ccc; margin-top: 2px; }
     .card-count { text-align: center; font-size: 15px; color: #888; margin-top: 8px; }
     .form-card { background: #fff; border: 0.5px solid #ddd; border-radius: 16px; padding: 1.5rem; margin-bottom: 16px; }
     .form-label { font-size: 15px; color: #888; display: block; margin-bottom: 4px; }
@@ -45,8 +45,10 @@
     .add-msg { margin-top: 12px; text-align: center; font-size: 15px; }
     .add-msg.ok { color: #009246; }
     .add-msg.err { color: #CE2B37; }
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-    .stat-card { background: #eee; border-radius: 10px; padding: 12px 8px; text-align: center; }
+    .deck-top { display: flex; gap: 10px; margin-bottom: 16px; }
+    .search-box { flex: 1; padding: 11px 13px; border: 0.5px solid #ddd; border-radius: 12px; font-size: 15px; outline: none; background: #fff; }
+    .search-box:focus { border-color: #009246; }
+    .stat-card-single { background: #eee; border-radius: 10px; padding: 12px 8px; text-align: center; min-width: 80px; }
     .stat-label { font-size: 13px; color: #888; margin-bottom: 4px; }
     .stat-val { font-size: 24px; font-weight: 500; }
     .stats-list { background: #fff; border: 0.5px solid #ddd; border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 16px; }
@@ -57,11 +59,16 @@
     .export-btns { display: flex; gap: 10px; }
     .btn-export { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 15px; font-weight: 500; cursor: pointer; }
     .btn-import { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #888; background: transparent; color: #888; font-size: 15px; font-weight: 500; cursor: pointer; }
-
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: #ccc; padding: 6px 0 8px; background: #f5f5f0; }
     /* Modal */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
     .modal { background: #fff; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; }
-    .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+    .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+    .modal-desc { font-size: 13px; color: #aaa; margin-bottom: 16px; line-height: 1.4; }
+    .modal-option { width: 100%; padding: 13px 16px; border-radius: 12px; border: 1.5px solid #ddd; background: transparent; color: #222; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; text-align: left; transition: background 0.15s; }
+    .modal-option:hover { background: #f5f5f0; }
+    .modal-option.neutral { color: #888; font-weight: 400; border-color: #eee; font-size: 15px; }
+    .modal-option.danger { color: #CE2B37; border-color: #CE2B37; }
     .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
     .btn-cancel { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #ddd; background: transparent; color: #888; font-size: 15px; cursor: pointer; }
     .btn-save { flex: 1; padding: 12px 0; border-radius: 12px; border: none; background: #009246; color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; }
@@ -70,6 +77,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
+<div class="footer">Application développée par Matthieu Opitz</div>
 <input type="file" id="import-input" accept=".json" style="display:none" onchange="importCards(event)" />
 
 <script>
@@ -79,13 +87,13 @@ const EMOJI_MAP = {
   "maison":"🏠","appartement":"🏢","ecole":"🏫","hopital":"🏥","eglise":"⛪","chateau":"🏰","tour":"🗼","pont":"🌉","plage":"🏖️","montagne":"⛰️","foret":"🌲","desert":"🏜️","ile":"🏝️","mer":"🌊","riviere":"🏞️","volcan":"🌋","ville":"🏙️",
   "voiture":"🚗","camion":"🚚","bus":"🚌","velo":"🚲","moto":"🏍️","train":"🚂","avion":"✈️","bateau":"⛵","fusee":"🚀","helicoptere":"🚁","ambulance":"🚑","taxi":"🚕","trottinette":"🛴","metro":"🚇",
   "balais":"🧹","aspirateur":"🧹","savon":"🧼","shampooing":"🧴","miroir":"🪞","fenetre":"🪟","porte":"🚪","lit":"🛏️","canape":"🛋️","chaise":"🪑","escalier":"🪜",
-  "telephone":"📱","ordinateur":"💻","television":"📺","radio":"📻","appareil photo":"📷","camera":"🎥","livre":"📚","journal":"📰","lettre":"✉️","crayon":"✏️","stylo":"🖊️","ciseaux":"✂️","clef":"🔑","cadenas":"🔒","lampe":"💡","loupe":"🔍","lunettes":"👓","montre":"⌚","sac":"👜","valise":"🧳","parapluie":"☂️",
-  "soleil":"☀️","lune":"🌙","etoile":"⭐","nuage":"☁️","pluie":"🌧️","neige":"❄️","arc en ciel":"🌈","feu":"🔥","vent":"💨","foudre":"⚡","fleur":"🌸","rose":"🥀","arbre":"🌳","feuille":"🍃","herbe":"🌿","cactus":"🌵","graine":"🌱",
+  "telephone":"📱","ordinateur":"💻","television":"📺","radio":"📻","camera":"🎥","livre":"📚","journal":"📰","lettre":"✉️","crayon":"✏️","stylo":"🖊️","ciseaux":"✂️","clef":"🔑","cadenas":"🔒","lampe":"💡","loupe":"🔍","lunettes":"👓","montre":"⌚","sac":"👜","valise":"🧳","parapluie":"☂️",
+  "soleil":"☀️","lune":"🌙","etoile":"⭐","nuage":"☁️","pluie":"🌧️","neige":"❄️","feu":"🔥","vent":"💨","foudre":"⚡","fleur":"🌸","rose":"🥀","arbre":"🌳","feuille":"🍃","herbe":"🌿","cactus":"🌵","graine":"🌱",
   "main":"✋","pied":"🦶","oeil":"👁️","oreille":"👂","nez":"👃","bouche":"👄","coeur":"❤️","cerveau":"🧠","muscle":"💪","os":"🦴","dent":"🦷",
   "bebe":"👶","enfant":"🧒","homme":"👨","femme":"👩","garcon":"👦","fille":"👧","famille":"👨‍👩‍👧","roi":"🤴","reine":"👸","policier":"👮","medecin":"👨‍⚕️","professeur":"👨‍🏫","cuisinier":"👨‍🍳","astronaute":"👨‍🚀",
   "football":"⚽","basketball":"🏀","tennis":"🎾","natation":"🏊","ski":"⛷️","surf":"🏄","boxe":"🥊","golf":"⛳","rugby":"🏉","baseball":"⚾","volleyball":"🏐",
   "musique":"🎵","guitare":"🎸","piano":"🎹","violon":"🎻","trompette":"🎺","batterie":"🥁","micro":"🎤","casque":"🎧","cinema":"🎬","theatre":"🎭","peinture":"🎨","danse":"💃","fete":"🎉","cadeau":"🎁","ballon":"🎈",
-  "argent":"💰","piece":"🪙","billet":"💵","carte":"💳","couronne":"👑","trophee":"🏆","medaille":"🥇","diplome":"🎓"
+  "argent":"💰","piece":"🪙","billet":"💵","couronne":"👑","trophee":"🏆","medaille":"🥇","diplome":"🎓"
 };
 
 function findEmoji(fr) {
@@ -114,13 +122,16 @@ const INITIAL_CARDS = [
 ];
 
 let raw = JSON.parse(localStorage.getItem("fc_cards") || "null") || INITIAL_CARDS;
-let cards = raw.map(c => ({ ...c, emoji: cleanEmoji(c.emoji) || findEmoji(c.fr) }));
+let cards = raw.map(c => ({ ...c, emoji: cleanEmoji(c.emoji) }));
 let scores = JSON.parse(localStorage.getItem("fc_scores") || "{}");
 let nextId = Math.max(...cards.map(c => c.id)) + 1;
 let deck = [], idx = 0, flipped = false;
 let sessionRight = 0, sessionWrong = 0;
 let view = "study";
 let pressTimer = null;
+let btnPressTimer = null;
+let lastCardId = null;
+let searchQuery = "";
 
 function save() {
   localStorage.setItem("fc_cards", JSON.stringify(cards));
@@ -128,12 +139,23 @@ function save() {
 }
 save();
 
+function isCardActive(c) {
+  const s = scores[c.id];
+  if (!s) return true;
+  if (s.sidelined && Date.now() < s.sidelined) return false;
+  return true;
+}
+
 function buildDeck() {
   const n = cards.length;
   const d = [];
   cards.forEach((c, i) => {
+    if (!isCardActive(c)) return;
     const s = scores[c.id] || { right: 0, wrong: 0 };
-    let w = Math.max(1, 1 + s.wrong * 2 - s.right);
+    let w = Math.max(1, 1 + (s.wrong||0) * 2 - (s.right||0));
+    // Priorité manuelle
+    if (s.priority && Date.now() < s.priority) w *= 3;
+    // Bonus nouveauté
     const rank = n - i;
     if (rank <= 10) w *= 3;
     else if (rank <= 30) w *= 2;
@@ -186,12 +208,23 @@ function render() {
         </div>
       </div>
       <div id="answer-btns" class="answer-btns" style="display:${flipped?'flex':'none'}">
-        <button class="btn-wrong" id="btn-wrong" onclick="flashBtn('btn-wrong', false)">✗ À revoir</button>
-        <button class="btn-right" id="btn-right" onclick="flashBtn('btn-right', true)">✓ Je savais</button>
+        <button class="btn-wrong" id="btn-wrong"
+          onclick="flashBtn('btn-wrong', false)"
+          onmousedown="startBtnPress('wrong')" onmouseup="cancelBtnPress()" onmouseleave="cancelBtnPress()"
+          ontouchstart="startBtnPress('wrong')" ontouchend="cancelBtnPress()" ontouchcancel="cancelBtnPress()">
+          ✗ À revoir
+        </button>
+        <button class="btn-right" id="btn-right"
+          onclick="flashBtn('btn-right', true)"
+          onmousedown="startBtnPress('right')" onmouseup="cancelBtnPress()" onmouseleave="cancelBtnPress()"
+          ontouchstart="startBtnPress('right')" ontouchend="cancelBtnPress()" ontouchcancel="cancelBtnPress()">
+          ✓ Je savais
+        </button>
       </div>
-      <p id="card-count" class="card-count" style="display:${flipped?'none':'block'}">${cards.length} cartes dans le deck</p>`;
+      <p class="btn-hint">Appui long sur un bouton pour plus d'options</p>
+      <p id="card-count" class="card-count" style="display:${flipped?'none':'block'}">${deck.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).length} cartes actives</p>`;
     } else {
-      html += `<p style="text-align:center;padding:3rem 0;color:#888">Aucune carte. Ajoutes-en !</p>`;
+      html += `<p style="text-align:center;padding:3rem 0;color:#888">Aucune carte disponible.</p>`;
     }
   }
 
@@ -207,40 +240,57 @@ function render() {
   }
 
   if (view === "stats") {
-    html += `<div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">Cartes</div><div class="stat-val">${cards.length}</div></div>
-      <div class="stat-card"><div class="stat-label">Réussies</div><div class="stat-val" style="color:#009246">${sessionRight}</div></div>
-      <div class="stat-card"><div class="stat-label">À revoir</div><div class="stat-val" style="color:#CE2B37">${sessionWrong}</div></div>
+    const filtered = searchQuery
+      ? cards.filter(c => c.fr.toLowerCase().includes(searchQuery.toLowerCase()) || c.it.toLowerCase().includes(searchQuery.toLowerCase()))
+      : cards;
+
+    html += `<div class="deck-top">
+      <input class="search-box" id="search-input" placeholder="🔍 Rechercher un mot..." value="${searchQuery}" oninput="updateSearch(this.value)" />
+      <div class="stat-card-single"><div class="stat-label">Cartes</div><div class="stat-val">${cards.length}</div></div>
     </div>
-    <div class="stats-list"><p class="stats-title">Mots dans le deck <span style="font-size:12px;color:#aaa;font-weight:400">(appui long pour modifier)</span></p>`;
-    cards.forEach(c => {
+    <div class="export-btns" style="margin-bottom:16px">
+      <button class="btn-export" onclick="exportCards()">⬇ Exporter</button>
+      <button class="btn-import" onclick="document.getElementById('import-input').click()">⬆ Importer</button>
+    </div>
+    <div class="stats-list"><p class="stats-title">Cartes dans le deck <span style="font-size:12px;color:#aaa;font-weight:400">(appui long pour modifier)</span></p>`;
+
+    filtered.forEach(c => {
       const s = scores[c.id] || { history: [] };
       const hist = (s.history || []).slice(-5);
       const dots = [];
       for (let i = 0; i < 5; i++) dots.push(i < hist.length ? (hist[i] ? '#009246' : '#CE2B37') : '#ddd');
       const dotsHtml = dots.map(col => `<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${col};margin-left:3px"></span>`).join('');
+      const isSidelined = s.sidelined && Date.now() < s.sidelined;
+      const isPriority = s.priority && Date.now() < s.priority;
+      const badge = isSidelined ? ' 💤' : isPriority ? ' 🔥' : '';
       html += `<div class="stat-row">
         <span class="stat-row-word"
           onmousedown="startPress(${c.id})" onmouseup="cancelPress()" onmouseleave="cancelPress()"
           ontouchstart="startPress(${c.id})" ontouchend="cancelPress()" ontouchcancel="cancelPress()">
-          ${c.fr} → ${c.it}
+          ${c.fr} → ${c.it}${badge}
         </span>
         <span style="white-space:nowrap">${dotsHtml}</span>
         <button onclick="deleteCard(${c.id})" style="background:none;border:none;cursor:pointer;font-size:16px;padding:2px 4px;color:#ccc">🗑️</button>
       </div>`;
     });
-    html += `</div>
-    <div class="export-btns">
-      <button class="btn-export" onclick="exportCards()">⬇ Exporter</button>
-      <button class="btn-import" onclick="document.getElementById('import-input').click()">⬆ Importer</button>
-    </div>`;
+
+    if (filtered.length === 0) html += `<p style="text-align:center;color:#aaa;font-size:14px;padding:1rem 0">Aucun résultat</p>`;
+
+    html += `</div>`;
   }
 
-  html += `<p style="text-align:center;font-size:11px;color:#ccc;margin-top:24px;margin-bottom:8px">Application edited by Matthieu Opitz</p>`;
   root.innerHTML = html;
 }
 
-function setView(v) { view = v; render(); }
+function updateSearch(val) {
+  searchQuery = val;
+  render();
+  // Remet le focus sur le champ après re-render
+  const inp = document.getElementById('search-input');
+  if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+
+function setView(v) { searchQuery = ""; view = v; render(); }
 
 function flipCard() {
   flipped = !flipped;
@@ -258,7 +308,61 @@ function flipCard() {
   }
 }
 
+// Appui long sur les boutons réponse
+function startBtnPress(type) {
+  btnPressTimer = setTimeout(() => {
+    cancelBtnPress();
+    openAnswerModal(type);
+  }, 600);
+}
+function cancelBtnPress() { clearTimeout(btnPressTimer); }
+
+function openAnswerModal(type) {
+  const card = deck[idx];
+  if (!card) return;
+  const modal = document.getElementById('modal-container');
+  if (type === 'right') {
+    modal.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
+      <h3>✓ Je savais</h3>
+      <p class="modal-desc">💤 Les cartes mises de côté disparaissent pendant 1 mois, puis reviennent automatiquement.</p>
+      <button class="modal-option" onclick="sidelineCard(${card.id})">Mettre de côté 1 mois</button>
+      <button class="modal-option danger" onclick="deleteCardAndNext(${card.id})">Supprimer la carte du deck</button>
+      <button class="modal-option neutral" onclick="closeModal()">Continuer normalement</button>
+    </div></div>`;
+  } else {
+    modal.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
+      <h3>✗ À revoir</h3>
+      <p class="modal-desc">🔥 Les cartes en priorité maximale apparaissent 3× plus souvent pendant 7 jours.</p>
+      <button class="modal-option" onclick="prioritizeCard(${card.id})">Priorité maximale 7 jours</button>
+      <button class="modal-option danger" onclick="deleteCardAndNext(${card.id})">Supprimer la carte du deck</button>
+      <button class="modal-option neutral" onclick="closeModal()">Continuer normalement</button>
+    </div></div>`;
+  }
+}
+
+function sidelineCard(id) {
+  const prev = scores[id] || { right: 0, wrong: 0, history: [] };
+  scores[id] = { ...prev, sidelined: Date.now() + 30 * 24 * 60 * 60 * 1000 };
+  save(); buildDeck(); closeModal(); render();
+}
+
+function prioritizeCard(id) {
+  const prev = scores[id] || { right: 0, wrong: 0, history: [] };
+  scores[id] = { ...prev, priority: Date.now() + 7 * 24 * 60 * 60 * 1000 };
+  save(); buildDeck(); closeModal(); render();
+}
+
+function deleteCardAndNext(id) {
+  cards = cards.filter(c => c.id !== id);
+  delete scores[id];
+  save(); buildDeck(); closeModal(); render();
+}
+
 function flashBtn(id, correct) {
+  // Si l'appui long est en cours, ne pas déclencher le clic normal
+  if (btnPressTimer === null) return;
+  clearTimeout(btnPressTimer);
+  btnPressTimer = null;
   const btn = document.getElementById(id);
   const cardInner = document.querySelector('.card-inner');
   if (btn) btn.classList.add('flash');
@@ -267,10 +371,8 @@ function flashBtn(id, correct) {
     cardInner.style.boxShadow = correct ? '0 0 0 5px rgba(0,146,70,0.25)' : '0 0 0 5px rgba(206,43,55,0.25)';
     cardInner.style.borderRadius = '16px';
   }
-  setTimeout(() => answer(correct), 400);
+  setTimeout(() => answer(correct), 350);
 }
-
-let lastCardId = null;
 
 function answer(correct) {
   const card = deck[idx];
@@ -278,10 +380,9 @@ function answer(correct) {
   lastCardId = card.id;
   const prev = scores[card.id] || { right: 0, wrong: 0, history: [] };
   const history = [...(prev.history || []), correct].slice(-10);
-  scores[card.id] = { right: correct ? prev.right+1 : prev.right, wrong: !correct ? prev.wrong+1 : prev.wrong, history };
+  scores[card.id] = { ...prev, right: correct ? (prev.right||0)+1 : (prev.right||0), wrong: !correct ? (prev.wrong||0)+1 : (prev.wrong||0), history };
   if (correct) sessionRight++; else sessionWrong++;
   save(); buildDeck();
-  // Cherche un index qui ne soit pas la même carte
   let newIdx = Math.floor(Math.random() * Math.min(deck.length, 5));
   let tries = 0;
   while (deck[newIdx] && deck[newIdx].id === lastCardId && tries < 10) {
@@ -312,37 +413,30 @@ function deleteCard(id) {
   save(); buildDeck(); render();
 }
 
-// Appui long pour modifier
+// Appui long pour modifier dans le Deck
 function startPress(id) {
   pressTimer = setTimeout(() => openEditModal(id), 600);
 }
-function cancelPress() {
-  clearTimeout(pressTimer);
-}
+function cancelPress() { clearTimeout(pressTimer); }
 
 function openEditModal(id) {
   const c = cards.find(x => x.id === id);
   if (!c) return;
   const modal = document.getElementById('modal-container');
-  modal.innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
-      <div class="modal">
-        <h3>✏️ Modifier la carte</h3>
-        <label class="form-label">Mot en français</label>
-        <input class="form-input" id="edit-fr" value="${c.fr}" />
-        <label class="form-label">Traduction italienne</label>
-        <input class="form-input" id="edit-it" value="${c.it}" />
-        <div class="modal-btns">
-          <button class="btn-cancel" onclick="closeModal()">Annuler</button>
-          <button class="btn-save" onclick="saveEdit(${id})">Enregistrer</button>
-        </div>
-      </div>
-    </div>`;
+  modal.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
+    <h3>✏️ Modifier la carte</h3>
+    <label class="form-label">Mot en français</label>
+    <input class="form-input" id="edit-fr" value="${c.fr}" />
+    <label class="form-label">Traduction italienne</label>
+    <input class="form-input" id="edit-it" value="${c.it}" />
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-save" onclick="saveEdit(${id})">Enregistrer</button>
+    </div>
+  </div></div>`;
 }
 
-function closeModal() {
-  document.getElementById('modal-container').innerHTML = '';
-}
+function closeModal() { document.getElementById('modal-container').innerHTML = ''; }
 
 function saveEdit(id) {
   const fr = document.getElementById('edit-fr').value.trim();
@@ -350,23 +444,19 @@ function saveEdit(id) {
   if (!fr || !it) return;
   const i = cards.findIndex(c => c.id === id);
   if (i === -1) return;
-  cards[i] = { ...cards[i], fr, it, emoji: findEmoji(fr) || cards[i].emoji };
+  cards[i] = { ...cards[i], fr, it };
   save(); buildDeck(); closeModal(); render();
 }
 
-// Export
 function exportCards() {
   const data = { cards, scores };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'flashcards-italien.json';
-  a.click();
+  a.href = url; a.download = 'flashcards-italien.json'; a.click();
   URL.revokeObjectURL(url);
 }
 
-// Import
 function importCards(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -375,22 +465,23 @@ function importCards(e) {
     try {
       const data = JSON.parse(ev.target.result);
       if (data.cards && Array.isArray(data.cards)) {
-        cards = data.cards.map(c => ({ ...c, emoji: cleanEmoji(c.emoji) || findEmoji(c.fr) }));
+        cards = data.cards.map(c => ({ ...c, emoji: cleanEmoji(c.emoji) }));
         scores = data.scores || {};
         nextId = Math.max(...cards.map(c => c.id)) + 1;
         save(); buildDeck(); render();
         alert(`${cards.length} cartes importées avec succès !`);
-      } else {
-        alert('Fichier invalide.');
-      }
+      } else { alert('Fichier invalide.'); }
     } catch { alert('Erreur lors de la lecture du fichier.'); }
   };
   reader.readAsText(file);
   e.target.value = '';
 }
 
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+// Correction du bug flashBtn : reset btnPressTimer après cancelBtnPress
+const _cancelBtnPress = cancelBtnPress;
+window.cancelBtnPress = function() { _cancelBtnPress(); btnPressTimer = 1; };
 
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 buildDeck();
 render();
 </script>

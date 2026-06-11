@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-title" content="Flashcards IT" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f5f5f0; min-height: 100vh; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f0; min-height: 100vh; touch-action: manipulation; }
     #root { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem 3rem 1rem; }
     h2 { text-align: center; font-size: 22px; font-weight: 500; margin-bottom: 4px; }
     .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 20px; }
@@ -130,6 +130,11 @@ function cleanEmoji(val) {
   return val;
 }
 
+function esc(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 var INITIAL_CARDS = [
   { id: 1, fr: "le chat", it: "il gatto", emoji: "🐱" },
   { id: 2, fr: "le chien", it: "il cane", emoji: "🐶" },
@@ -205,8 +210,8 @@ function render() {
     html += "</div>";
 
     if (card) {
-      var front = card.reversed ? card.it : card.fr;
-      var back  = card.reversed ? card.fr : card.it;
+      var front = esc(card.reversed ? card.it : card.fr);
+      var back  = esc(card.reversed ? card.fr : card.it);
       var lang  = card.reversed ? "🇮🇹 → 🇫🇷" : "🇫🇷 → 🇮🇹";
       var e = card.emoji;
 
@@ -248,16 +253,8 @@ function render() {
   }
 
   if (view === "stats") {
-    var filtered = cards;
-    if (searchQuery) {
-      var q = searchQuery.toLowerCase();
-      filtered = cards.filter(function(c) {
-        return c.fr.toLowerCase().indexOf(q) !== -1 || c.it.toLowerCase().indexOf(q) !== -1;
-      });
-    }
-
     html += "<div class='deck-top'>";
-    html += "<input class='search-box' id='search-input' placeholder='🔍 Rechercher un mot...' value=\"" + searchQuery.replace(/"/g,"&quot;") + "\" oninput='updateSearch(this.value)' />";
+    html += "<input class='search-box' id='search-input' placeholder='🔍 Rechercher un mot...' value=\"" + esc(searchQuery) + "\" oninput='updateSearch(this.value)' />";
     html += "<div class='stat-card-single'><div class='stat-label'>Cartes</div><div class='stat-val'>" + cards.length + "</div></div>";
     html += "</div>";
 
@@ -267,46 +264,48 @@ function render() {
     html += "</div>";
 
     html += "<div class='stats-list'><p class='stats-title'>Cartes dans le deck <span style='font-size:12px;color:#aaa;font-weight:400'>(appui long pour modifier)</span></p>";
-
-    filtered.forEach(function(c) {
-      var s = scores[c.id] || {};
-      var hist = (s.history || []).slice(-5);
-      var dotsHtml = "";
-      for (var di = 0; di < 5; di++) {
-        var col = di < hist.length ? (hist[di] ? "#009246" : "#CE2B37") : "#ddd";
-        dotsHtml += "<span style='display:inline-block;width:11px;height:11px;border-radius:50%;background:" + col + ";margin-left:3px'></span>";
-      }
-      var isSidelined = s.sidelined && Date.now() < s.sidelined;
-      var isPriority = s.priority && Date.now() < s.priority;
-      var badge = isSidelined ? " 💤" : (isPriority ? " 🔥" : "");
-
-      html += "<div class='stat-row'>";
-      html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + c.fr + " → " + c.it + badge + "</span>";
-      html += "<span style='white-space:nowrap'>" + dotsHtml + "</span>";
-      html += "<button onclick='deleteCard(" + c.id + ")' style='background:none;border:none;cursor:pointer;font-size:16px;padding:2px 4px;color:#ccc'>🗑️</button>";
-      html += "</div>";
-    });
-
-    if (filtered.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>Aucun résultat</p>";
-
+    html += "<div id='deck-list'>" + buildDeckListHtml() + "</div>";
     html += "</div>";
   }
 
   root.innerHTML = html;
+}
 
-  if (view === "stats") {
-    var inp = document.getElementById("search-input");
-    if (inp) {
-      inp.focus();
-      var len = inp.value.length;
-      inp.setSelectionRange(len, len);
-    }
+function buildDeckListHtml() {
+  var filtered = cards;
+  if (searchQuery) {
+    var q = searchQuery.toLowerCase();
+    filtered = cards.filter(function(c) {
+      return c.fr.toLowerCase().indexOf(q) !== -1 || c.it.toLowerCase().indexOf(q) !== -1;
+    });
   }
+  var html = "";
+  filtered.forEach(function(c) {
+    var s = scores[c.id] || {};
+    var hist = (s.history || []).slice(-5);
+    var dotsHtml = "";
+    for (var di = 0; di < 5; di++) {
+      var col = di < hist.length ? (hist[di] ? "#009246" : "#CE2B37") : "#ddd";
+      dotsHtml += "<span style='display:inline-block;width:11px;height:11px;border-radius:50%;background:" + col + ";margin-left:3px'></span>";
+    }
+    var isSidelined = s.sidelined && Date.now() < s.sidelined;
+    var isPriority = s.priority && Date.now() < s.priority;
+    var badge = isSidelined ? " 💤" : (isPriority ? " 🔥" : "");
+
+    html += "<div class='stat-row'>";
+    html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + esc(c.fr) + " → " + esc(c.it) + badge + "</span>";
+    html += "<span style='white-space:nowrap'>" + dotsHtml + "</span>";
+    html += "<button onclick='deleteCard(" + c.id + ")' style='background:none;border:none;cursor:pointer;font-size:16px;padding:2px 4px;color:#ccc'>🗑️</button>";
+    html += "</div>";
+  });
+  if (filtered.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>Aucun résultat</p>";
+  return html;
 }
 
 function updateSearch(val) {
   searchQuery = val;
-  render();
+  var list = document.getElementById("deck-list");
+  if (list) list.innerHTML = buildDeckListHtml();
 }
 
 function setView(v) { searchQuery = ""; view = v; render(); }
@@ -371,13 +370,23 @@ function answer(correct) {
   });
   if (correct) sessionRight++; else sessionWrong++;
   save(); buildDeck();
-  var newIdx = Math.floor(Math.random() * Math.min(deck.length, 5));
-  var tries = 0;
-  while (deck[newIdx] && deck[newIdx].id === lastCardId && tries < 10) {
-    newIdx = Math.floor(Math.random() * Math.min(deck.length, 5));
-    tries++;
+  // Anti-répétition : cherche en priorité une carte différente de la précédente
+  var pool = Math.min(deck.length, 5);
+  var candidates = [];
+  for (var ci = 0; ci < pool; ci++) {
+    if (deck[ci].id !== lastCardId) candidates.push(ci);
   }
-  idx = newIdx;
+  if (candidates.length === 0) {
+    // Élargit la recherche à tout le deck
+    for (var cj = 0; cj < deck.length; cj++) {
+      if (deck[cj].id !== lastCardId) candidates.push(cj);
+    }
+  }
+  if (candidates.length > 0) {
+    idx = candidates[Math.floor(Math.random() * candidates.length)];
+  } else {
+    idx = 0; // une seule carte dans le deck, pas le choix
+  }
   flipped = false; render();
 }
 
@@ -414,9 +423,9 @@ function openEditModal(id) {
     "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
     "<h3>✏️ Modifier la carte</h3>" +
     "<label class='form-label'>Mot en français</label>" +
-    "<input class='form-input' id='edit-fr' value=\"" + c.fr.replace(/"/g,"&quot;") + "\" />" +
+    "<input class='form-input' id='edit-fr' value=\"" + esc(c.fr) + "\" />" +
     "<label class='form-label'>Traduction italienne</label>" +
-    "<input class='form-input' id='edit-it' value=\"" + c.it.replace(/"/g,"&quot;") + "\" />" +
+    "<input class='form-input' id='edit-it' value=\"" + esc(c.it) + "\" />" +
     "<div class='modal-btns'>" +
     "<button class='btn-cancel' onclick='closeModal()'>Annuler</button>" +
     "<button class='btn-save' onclick='saveEdit(" + id + ")'>Enregistrer</button>" +

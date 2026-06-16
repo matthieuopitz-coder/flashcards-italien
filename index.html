@@ -46,10 +46,10 @@
     .btn-wrong.flash { background: #CE2B37; color: #fff; }
     .btn-right { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
     .btn-right.flash { background: #009246; color: #fff; }
-    .btn-hint { text-align: center; font-size: 12px; color: #b0b0b0; margin-top: 2px; }
+    .btn-hint { text-align: center; font-size: 12px; color: #a0a0a0; margin-top: 2px; }
 
     .form-card { background: #fff; border: 0.5px solid #ddd; border-radius: 16px; padding: 1.5rem; margin-bottom: 16px; }
-    .form-label { font-size: 15px; color: #888; display: block; margin-bottom: 4px; }
+    .form-label { font-size: 16px; color: #666; display: block; margin-bottom: 4px; }
     .form-input { width: 100%; padding: 11px 13px; border: 0.5px solid #ddd; border-radius: 8px; font-size: 17px; margin-bottom: 14px; outline: none; }
     .form-input:focus { border-color: #009246; }
     .btn-add { width: 100%; padding: 14px 0; border-radius: 12px; border: none; background: #009246; color: #fff; font-size: 17px; font-weight: 500; cursor: pointer; }
@@ -71,7 +71,7 @@
     .export-btns { display: flex; gap: 10px; }
     .btn-export { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 15px; font-weight: 500; cursor: pointer; }
     .btn-import { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #888; background: transparent; color: #888; font-size: 15px; font-weight: 500; cursor: pointer; }
-    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: #ccc; padding: 6px 0 8px; background: #f5f5f0; }
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: #c4c4c4; padding: 6px 0 8px; background: #f5f5f0; }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
     .modal { background: #fff; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; }
@@ -205,7 +205,7 @@ function render() {
       if (e) html += "<div class='card-emoji'>" + e + "</div>";
       html += "<div class='card-word'>" + back + "</div>";
       html += "<div class='card-sub'>" + front + "</div>";
-      if (card.example) html += "<div class='card-example'>" + esc(card.example) + "</div>";
+      if (card.example) html += "<div class='card-example'>« " + esc(card.example) + " »</div>";
       html += "</div>";
       html += "</div>";
       html += "</div>";

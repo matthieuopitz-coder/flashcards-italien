@@ -16,7 +16,6 @@
     body.review-mode { background: #f3ecdd; }
     #root { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem 3rem 1rem; }
     h2 { text-align: center; font-size: 22px; font-weight: 500; margin-bottom: 20px; }
-    .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 20px; }
     .tabs { display: flex; justify-content: center; gap: 6px; margin-bottom: 24px; }
     .tab { padding: 9px 20px; border-radius: 20px; border: none; cursor: pointer; font-size: 16px; font-weight: 500; background: transparent; color: #555; transition: all 0.2s; }
     .tab.active { background: #009246; color: #fff; }
@@ -74,7 +73,6 @@
     .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .list-title { font-size: 17px; font-weight: 600; }
     .list-title .count { color: #009246; font-weight: 600; }
-    .list-title .hint { font-size: 12px; color: #aaa; font-weight: 400; }
     .list-scroll { max-height: 320px; overflow-y: auto; }
     .collapse-btn { background: none; border: none; cursor: pointer; font-size: 14px; color: #888; display: flex; align-items: center; gap: 6px; }
     .stat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 15px; user-select: none; }
@@ -82,9 +80,10 @@
     .stat-row-word:active { background: #f0f0e8; }
     .mastered-block { background: #f3ecdd; border-color: #b09660; }
     .btn-review-mastered { width: 100%; padding: 11px 0; border-radius: 12px; border: 1.5px solid #C79A3B; background: transparent; color: #9a7524; font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 12px; }
+    .row-plus { background: #f0f0eb; border: 1px solid #bbb; border-radius: 7px; cursor: pointer; font-size: 19px; width: 27px; height: 27px; padding: 0; color: #666; line-height: 1; display: flex; align-items: center; justify-content: center; }
     .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: #c4c4c4; padding: 6px 0 8px; background: #f5f5f0; }
-    .footer .version { color: #bbb; margin-left: 6px; }
     body.review-mode .footer { background: #f3ecdd; }
+    .footer .version { color: #bbb; margin-left: 6px; }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
     .modal { background: #fff; border: 1px solid #ccc; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; position: relative; }
@@ -111,25 +110,25 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.08</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.10</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" onchange="importCards(event)" />
 
 <script>
+// ===== Utilitaires =====
 function cleanEmoji(val) {
   if (!val || val === "null" || val === "undefined") return null;
   return val;
 }
-
 function esc(s) {
   if (!s) return "";
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
-
 // Comme esc, mais autorise un retour à la ligne après chaque "/" (séparateur de synonymes)
 function escWrap(s) {
   return esc(s).replace(/\//g, "/<wbr>");
 }
 
+// ===== Données initiales =====
 var INITIAL_CARDS = [
   { id: 1, fr: "le chat", it: "il gatto", emoji: "🐱" },
   { id: 2, fr: "le chien", it: "il cane", emoji: "🐶" },
@@ -138,9 +137,8 @@ var INITIAL_CARDS = [
   { id: 5, fr: "la pomme", it: "la mela", emoji: "🍎" }
 ];
 
-// Chargement + normalisation (compatibilité anciens exports)
-var raw = JSON.parse(localStorage.getItem("fc_cards") || "null") || INITIAL_CARDS;
-var cards = raw.map(function(c) {
+// ===== Chargement + normalisation (compatibilité anciens exports) =====
+function normalizeCard(c) {
   var emoji = (c.id >= 1 && c.id <= 5) ? cleanEmoji(c.emoji) : null;
   return {
     id: c.id,
@@ -151,26 +149,55 @@ var cards = raw.map(function(c) {
     example2: c.example2 || null,
     archived: c.archived === true
   };
-});
-var scores = JSON.parse(localStorage.getItem("fc_scores") || "{}");
+}
+
+var raw;
+try {
+  raw = JSON.parse(localStorage.getItem("fc_cards") || "null");
+} catch (err) { raw = null; }
+if (!raw || !Array.isArray(raw)) raw = INITIAL_CARDS;
+
+var cards = raw.map(normalizeCard);
+var scores;
+try {
+  scores = JSON.parse(localStorage.getItem("fc_scores") || "{}");
+} catch (err) { scores = {}; }
 var nextId = Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1;
 
+// ===== État global =====
 var deck = [], idx = 0, flipped = false;
-var sessionRight = 0, sessionWrong = 0;
 var view = "study";
 var pressTimer = null;
 var btnPressTimer = null;
 var lastCardId = null;
 var searchQuery = "";
 var masteredOpen = false;
-var reviewMode = false; // true = on révise les cartes maîtrisées
+var reviewMode = false;
 
+// ===== Compteurs journaliers (étudier / révision séparés) =====
+function todayKey() {
+  var d = new Date();
+  return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+}
+var dailyStats = null;
+try {
+  dailyStats = JSON.parse(localStorage.getItem("fc_daily") || "null");
+} catch (err) { dailyStats = null; }
+if (!dailyStats || dailyStats.date !== todayKey() ||
+    typeof dailyStats.studyRight !== "number" || typeof dailyStats.reviewRight !== "number") {
+  dailyStats = { date: todayKey(), studyRight: 0, studyWrong: 0, reviewRight: 0, reviewWrong: 0 };
+  localStorage.setItem("fc_daily", JSON.stringify(dailyStats));
+}
+function saveDaily() { localStorage.setItem("fc_daily", JSON.stringify(dailyStats)); }
+
+// ===== Sauvegarde =====
 function save() {
   localStorage.setItem("fc_cards", JSON.stringify(cards));
   localStorage.setItem("fc_scores", JSON.stringify(scores));
 }
 save();
 
+// ===== Construction du deck =====
 function isCardActive(c) {
   if (c.archived) return false;
   var s = scores[c.id];
@@ -185,7 +212,7 @@ function buildDeck() {
   var d = [];
   pool.forEach(function(c, i) {
     var s = scores[c.id] || { right: 0, wrong: 0 };
-    var w = Math.max(1, 1 + (s.wrong||0) * 2 - (s.right||0));
+    var w = Math.max(1, 1 + (s.wrong || 0) * 2 - (s.right || 0));
     if (!reviewMode && s.priority && Date.now() < s.priority) w *= 3;
     if (!reviewMode) {
       var rank = n - i;
@@ -201,8 +228,8 @@ function buildDeck() {
   deck = d; idx = 0; flipped = false;
 }
 
+// ===== Rendu =====
 function render() {
-  // Mémorise les positions de défilement des listes avant reconstruction
   var savedScroll = {};
   var al = document.getElementById("active-list");
   var ml = document.getElementById("mastered-list");
@@ -211,6 +238,7 @@ function render() {
 
   var root = document.getElementById("root");
   document.body.className = (view === "study" && reviewMode) ? "review-mode" : "";
+
   var right = reviewMode ? dailyStats.reviewRight : dailyStats.studyRight;
   var wrong = reviewMode ? dailyStats.reviewWrong : dailyStats.studyWrong;
   var total = right + wrong;
@@ -300,13 +328,11 @@ function render() {
     html += "<button class='btn-import' onclick=\"document.getElementById('import-input').click()\">⬆ Importer</button>";
     html += "</div>";
 
-    // Bloc Deck actif
     html += "<div class='list-block'>";
     html += "<div class='list-header'><span class='list-title'>Cartes en jeu <span class='count'>(" + activeCards.length + ")</span></span></div>";
     html += "<div class='list-scroll' id='active-list'>" + buildListHtml(false) + "</div>";
     html += "</div>";
 
-    // Bloc Cartes maîtrisées (repliable)
     html += "<div class='list-block mastered-block'>";
     html += "<div class='list-header'>";
     html += "<span class='list-title'>Cartes archivées <span class='count' style='color:#9a7524'>(" + masteredCards.length + ")</span></span>";
@@ -314,7 +340,7 @@ function render() {
     html += "</div>";
     if (masteredOpen) {
       if (masteredCards.length > 0) {
-        html += "<button class='btn-review-mastered' id='btn-review' onclick='startReviewDelayed()'>▶ Réviser les cartes maîtrisées</button>";
+        html += "<button class='btn-review-mastered' id='btn-review' onclick='startReviewDelayed()'>▶ Réviser les cartes archivées</button>";
       }
       html += "<div class='list-scroll' id='mastered-list'>" + buildListHtml(true) + "</div>";
     }
@@ -323,12 +349,11 @@ function render() {
 
   root.innerHTML = html;
 
-  // Restaure les positions de défilement (après recalcul de la mise en page)
   var doRestore = function() {
-    var al2 = document.getElementById("active-list");
-    var ml2 = document.getElementById("mastered-list");
-    if (al2 && savedScroll.active) al2.scrollTop = savedScroll.active;
-    if (ml2 && savedScroll.mastered) ml2.scrollTop = savedScroll.mastered;
+    var a2 = document.getElementById("active-list");
+    var m2 = document.getElementById("mastered-list");
+    if (a2 && savedScroll.active) a2.scrollTop = savedScroll.active;
+    if (m2 && savedScroll.mastered) m2.scrollTop = savedScroll.mastered;
   };
   doRestore();
   requestAnimationFrame(doRestore);
@@ -336,7 +361,6 @@ function render() {
 
 function buildListHtml(archived) {
   var list = cards.filter(function(c){ return archived ? c.archived : !c.archived; });
-  // Récentes en haut
   list = list.slice().sort(function(a, b){ return b.id - a.id; });
   if (searchQuery) {
     var q = searchQuery.toLowerCase();
@@ -360,7 +384,7 @@ function buildListHtml(archived) {
     html += "<div class='stat-row'>";
     html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + esc(c.fr) + " → " + esc(c.it) + badge + "</span>";
     html += "<span style='white-space:nowrap'>" + dotsHtml + "</span>";
-    html += "<button onclick='openRowMenu(" + c.id + "," + (archived ? "true" : "false") + ")' style='background:#f0f0eb;border:1px solid #bbb;border-radius:7px;cursor:pointer;font-size:19px;width:27px;height:27px;padding:0;color:#666;line-height:1;display:flex;align-items:center;justify-content:center'>+</button>";
+    html += "<button class='row-plus' onclick='openRowMenu(" + c.id + "," + (archived ? "true" : "false") + ")'>+</button>";
     html += "</div>";
   });
   if (list.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>" + (archived ? "Aucune carte archivée" : "Aucune carte") + "</p>";
@@ -379,12 +403,12 @@ function toggleMastered() { masteredOpen = !masteredOpen; render(); }
 
 function setView(v) {
   searchQuery = "";
-  // Quitter le mode révision dès qu'on change de section
   if (reviewMode) { reviewMode = false; buildDeck(); }
   view = v;
   render();
 }
 
+// ===== Jeu =====
 function flipCard() {
   flipped = !flipped;
   var inner = document.querySelector(".card-inner");
@@ -435,22 +459,34 @@ function answer(correct) {
   var prev = scores[card.id] || { right: 0, wrong: 0, history: [] };
   var history = (prev.history || []).concat([correct]).slice(-10);
   scores[card.id] = Object.assign({}, prev, {
-    right: correct ? (prev.right||0)+1 : (prev.right||0),
-    wrong: !correct ? (prev.wrong||0)+1 : (prev.wrong||0),
+    right: correct ? (prev.right || 0) + 1 : (prev.right || 0),
+    wrong: !correct ? (prev.wrong || 0) + 1 : (prev.wrong || 0),
     history: history
   });
-  if (correct) sessionRight++; else sessionWrong++;
-  save(); buildDeck();
+  if (reviewMode) {
+    if (correct) dailyStats.reviewRight++; else dailyStats.reviewWrong++;
+  } else {
+    if (correct) dailyStats.studyRight++; else dailyStats.studyWrong++;
+  }
+  saveDaily();
+  save();
+  buildDeck();
+  var pool = Math.min(deck.length, 5);
   var candidates = [];
-  var candidates = [];
-  for (var ci = 0; ci < pool; ci++) if (deck[ci].id !== lastCardId) candidates.push(ci);
+  for (var ci = 0; ci < pool; ci++) {
+    if (deck[ci].id !== lastCardId) candidates.push(ci);
+  }
   if (candidates.length === 0) {
-    for (var cj = 0; cj < deck.length; cj++) if (deck[cj].id !== lastCardId) candidates.push(cj);
+    for (var cj = 0; cj < deck.length; cj++) {
+      if (deck[cj].id !== lastCardId) candidates.push(cj);
+    }
   }
   idx = candidates.length > 0 ? candidates[Math.floor(Math.random() * candidates.length)] : 0;
-  flipped = false; render();
+  flipped = false;
+  render();
 }
 
+// ===== Ajout / suppression / édition =====
 function addCard() {
   var fr = document.getElementById("inp-fr").value.trim();
   var it = document.getElementById("inp-it").value.trim();
@@ -468,23 +504,40 @@ function addCard() {
   msg.textContent = "Carte \"" + fr + "\" ajoutée !";
 }
 
-function deleteCard(id) {
-  if (!confirm("Supprimer cette carte ?")) return;
-  cards = cards.filter(function(c){ return c.id !== id; });
-  delete scores[id];
-  save(); buildDeck(); render();
-}
-
 function startPress(id) {
   pressTimer = setTimeout(function(){ openEditModal(id); }, 600);
 }
 function cancelPress() { clearTimeout(pressTimer); }
 
+function openRowMenu(id, archived) {
+  var c = cards.find(function(x){ return x.id === id; });
+  if (!c) return;
+  var opts = "";
+  opts += "<button class='modal-option' onclick='openEditModal(" + id + ")'>✏️ Modifier la carte</button>";
+  if (archived) {
+    opts += "<button class='modal-option reactivate' id='rm-react' onclick=\"flashOption('rm-react','flash-green', function(){ reactivateCard(" + id + "); })\">Remettre la carte en jeu</button>";
+  } else {
+    opts += "<button class='modal-option archive' id='rm-arch' onclick=\"flashOption('rm-arch','flash-gold', function(){ archiveCard(" + id + "); })\">Archiver la carte</button>";
+  }
+  opts += "<button class='modal-option danger' id='rm-del' onclick=\"flashOption('rm-del','flash-red', function(){ deleteFromMenu(" + id + "); })\">Supprimer la carte</button>";
+  document.getElementById("modal-container").innerHTML =
+    "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
+    "<button class='modal-close' onclick='closeModal()'>×</button>" +
+    "<h3>Options</h3>" +
+    "<div style='margin-top:8px'>" + opts + "</div>" +
+    "</div></div>";
+}
+
+function deleteFromMenu(id) {
+  cards = cards.filter(function(c){ return c.id !== id; });
+  delete scores[id];
+  save(); buildDeck(); closeModal(); render();
+}
+
 function openEditModal(id) {
   var c = cards.find(function(x){ return x.id === id; });
   if (!c) return;
-  var modal = document.getElementById("modal-container");
-  modal.innerHTML =
+  document.getElementById("modal-container").innerHTML =
     "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
     "<button class='modal-close' onclick='closeModal()'>×</button>" +
     "<h3>✏️ Modifier la carte</h3>" +
@@ -504,34 +557,6 @@ function openEditModal(id) {
 
 function closeModal() { document.getElementById("modal-container").innerHTML = ""; }
 
-function openRowMenu(id, archived) {
-  var c = cards.find(function(x){ return x.id === id; });
-  if (!c) return;
-  var modal = document.getElementById("modal-container");
-  var opts = "";
-  if (archived) {
-    opts += "<button class='modal-option' onclick='openEditModal(" + id + ")'>✏️ Modifier la carte</button>";
-    opts += "<button class='modal-option reactivate' id='rm-react' onclick=\"flashOption('rm-react','flash-green', function(){ reactivateCard(" + id + "); })\">Remettre la carte en jeu</button>";
-    opts += "<button class='modal-option danger' id='rm-del' onclick=\"flashOption('rm-del','flash-red', function(){ deleteFromMenu(" + id + "); })\">Supprimer la carte</button>";
-  } else {
-    opts += "<button class='modal-option' onclick='openEditModal(" + id + ")'>✏️ Modifier la carte</button>";
-    opts += "<button class='modal-option archive' id='rm-arch' onclick=\"flashOption('rm-arch','flash-gold', function(){ archiveCard(" + id + "); })\">Archiver la carte</button>";
-    opts += "<button class='modal-option danger' id='rm-del' onclick=\"flashOption('rm-del','flash-red', function(){ deleteFromMenu(" + id + "); })\">Supprimer la carte</button>";
-  }
-  modal.innerHTML =
-    "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
-    "<button class='modal-close' onclick='closeModal()'>×</button>" +
-    "<h3>Options</h3>" +
-    "<div style='margin-top:8px'>" + opts + "</div>" +
-    "</div></div>";
-}
-
-function deleteFromMenu(id) {
-  cards = cards.filter(function(c){ return c.id !== id; });
-  delete scores[id];
-  save(); buildDeck(); closeModal(); render();
-}
-
 function saveEdit(id) {
   var fr = document.getElementById("edit-fr").value.trim();
   var it = document.getElementById("edit-it").value.trim();
@@ -544,6 +569,7 @@ function saveEdit(id) {
   save(); buildDeck(); closeModal(); render();
 }
 
+// ===== Options par appui long (boutons réponse) =====
 function showAnswerOptions() {
   var card = deck[idx];
   if (!card) return;
@@ -604,6 +630,7 @@ function deleteCardAndNext(id) {
   save(); buildDeck(); closeModal(); render();
 }
 
+// ===== Révision des cartes archivées =====
 function startReviewDelayed() {
   var btn = document.getElementById("btn-review");
   if (btn) {
@@ -613,7 +640,6 @@ function startReviewDelayed() {
   }
   setTimeout(startReview, 350);
 }
-
 function startReview() {
   reviewMode = true;
   view = "study";
@@ -624,6 +650,7 @@ function exitReview() {
   buildDeck(); render();
 }
 
+// ===== Export / import =====
 function exportCards() {
   var data = { cards: cards, scores: scores };
   var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -641,15 +668,7 @@ function importCards(e) {
     try {
       var data = JSON.parse(ev.target.result);
       if (data.cards && Array.isArray(data.cards)) {
-        cards = data.cards.map(function(c){
-          var emoji = (c.id >= 1 && c.id <= 5) ? cleanEmoji(c.emoji) : null;
-          return {
-            id: c.id, fr: c.fr, it: c.it, emoji: emoji,
-            example: c.example || null,
-            example2: c.example2 || null,
-            archived: c.archived === true
-          };
-        });
+        cards = data.cards.map(normalizeCard);
         scores = data.scores || {};
         nextId = Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1;
         save(); buildDeck(); render();
@@ -661,6 +680,7 @@ function importCards(e) {
   e.target.value = "";
 }
 
+// ===== Démarrage =====
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 buildDeck();
 render();

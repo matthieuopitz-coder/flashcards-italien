@@ -13,6 +13,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #f5f5f0; min-height: 100vh; touch-action: manipulation; }
+    body.review-mode { background: #f3ecdd; }
     #root { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem 3rem 1rem; }
     h2 { text-align: center; font-size: 22px; font-weight: 500; margin-bottom: 4px; }
     .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 20px; }
@@ -26,20 +27,23 @@
     .card-inner.flipped { transform: rotateY(180deg); }
     .card-face {
       position: absolute; inset: 0;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
       border-radius: 16px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 12px; padding: 1.2rem;
       background: #fff; border: 2.5px solid #ddd;
     }
+    body.review-mode .card-face { border-color: #C79A3B; }
     .card-back { transform: rotateY(180deg); }
     .card-emoji { font-size: 56px; }
-    .card-word { font-size: 30px; font-weight: 600; text-align: center; word-break: break-word; max-width: 100%; line-height: 1.2; }
-    .card-sub { font-size: 20px; font-weight: 400; text-align: center; color: #555; word-break: break-word; max-width: 100%; line-height: 1.2; }
-    .card-example { font-size: 16px; font-style: italic; text-align: center; color: #777; word-break: break-word; max-width: 100%; line-height: 1.3; margin-top: 4px; }
+    .card-word { font-size: 30px; font-weight: 600; text-align: center; overflow-wrap: break-word; max-width: 100%; line-height: 1.2; }
+    .card-sub { font-size: 20px; font-weight: 400; text-align: center; color: #555; overflow-wrap: break-word; max-width: 100%; line-height: 1.2; }
+    .card-example { font-size: 16px; font-style: italic; text-align: center; color: #777; overflow-wrap: break-word; max-width: 100%; line-height: 1.3; margin-top: 4px; }
     .card-lang { font-size: 26px; letter-spacing: 4px; }
     .card-hint { font-size: 13px; color: #bbb; margin-top: 2px; }
+
+    .review-banner { text-align: center; background: #e8dab5; color: #7a5c1a; font-size: 14px; font-weight: 500; padding: 8px 12px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .review-banner button { background: none; border: none; color: #7a5c1a; font-size: 14px; cursor: pointer; text-decoration: underline; }
 
     .answer-btns { display: flex; gap: 12px; margin-bottom: 6px; }
     .btn-wrong { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #CE2B37; background: transparent; color: #CE2B37; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
@@ -60,32 +64,41 @@
     .deck-top { display: flex; gap: 10px; margin-bottom: 16px; }
     .search-box { flex: 1; padding: 8px 13px; border: 0.5px solid #ddd; border-radius: 12px; font-size: 15px; outline: none; background: #fff; }
     .search-box:focus { border-color: #009246; }
-    .stat-card-single { background: #eee; border-radius: 10px; padding: 8px 8px; text-align: center; min-width: 80px; }
-    .stat-label { font-size: 13px; color: #888; margin-bottom: 4px; }
-    .stat-val { font-size: 24px; font-weight: 500; }
-    .stats-list { background: #fff; border: 0.5px solid #ddd; border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 16px; }
-    .stats-title { font-size: 15px; font-weight: 500; margin-bottom: 12px; }
+    .export-btns { display: flex; gap: 10px; margin-bottom: 16px; }
+    .btn-export { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 15px; font-weight: 500; cursor: pointer; }
+    .btn-import { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #888; background: transparent; color: #888; font-size: 15px; font-weight: 500; cursor: pointer; }
+
+    .list-block { background: #fff; border: 0.5px solid #ddd; border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 16px; }
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .list-title { font-size: 15px; font-weight: 600; }
+    .list-title .count { color: #009246; font-weight: 600; }
+    .list-title .hint { font-size: 12px; color: #aaa; font-weight: 400; }
+    .list-scroll { max-height: 320px; overflow-y: auto; }
+    .collapse-btn { background: none; border: none; cursor: pointer; font-size: 14px; color: #888; display: flex; align-items: center; gap: 6px; }
     .stat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 15px; user-select: none; }
     .stat-row-word { flex: 1; cursor: pointer; padding: 2px 4px; border-radius: 6px; transition: background 0.2s; }
     .stat-row-word:active { background: #f0f0e8; }
-    .export-btns { display: flex; gap: 10px; }
-    .btn-export { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 15px; font-weight: 500; cursor: pointer; }
-    .btn-import { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #888; background: transparent; color: #888; font-size: 15px; font-weight: 500; cursor: pointer; }
+    .mastered-block { background: #f3ecdd; border-color: #e0d3b0; }
+    .btn-review-mastered { width: 100%; padding: 11px 0; border-radius: 12px; border: 1.5px solid #C79A3B; background: transparent; color: #9a7524; font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 12px; }
     .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: #c4c4c4; padding: 6px 0 8px; background: #f5f5f0; }
+    body.review-mode .footer { background: #f3ecdd; }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
-    .modal { background: #fff; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; }
-    .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+    .modal { background: #fff; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; position: relative; }
+    .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; padding-right: 30px; }
+    .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 22px; color: #aaa; cursor: pointer; line-height: 1; }
     .modal-desc { font-size: 13px; color: #aaa; margin-bottom: 16px; line-height: 1.4; }
     .modal-option { width: 100%; padding: 13px 16px; border-radius: 12px; border: 1.5px solid #ddd; background: transparent; color: #222; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; text-align: left; transition: background 0.15s, color 0.15s; }
     .modal-option:hover { background: #f5f5f0; }
-    .modal-option.neutral { color: #888; font-weight: 400; border-color: #ccc; font-size: 15px; }
     .modal-option.danger { color: #CE2B37; border-color: #CE2B37; }
     .modal-option.sideline { border-color: #2B7FCE; color: #2B7FCE; }
     .modal-option.priority { border-color: #E08A1E; color: #E08A1E; }
+    .modal-option.archive { border-color: #C79A3B; color: #9a7524; }
+    .modal-option.reactivate { border-color: #009246; color: #009246; }
     .modal-option.flash-blue { background: #2B7FCE; color: #fff; }
     .modal-option.flash-orange { background: #E08A1E; color: #fff; }
-    .modal-option.flash-grey { background: #888; color: #fff; }
+    .modal-option.flash-gold { background: #C79A3B; color: #fff; }
+    .modal-option.flash-green { background: #009246; color: #fff; }
     .modal-option.flash-red { background: #CE2B37; color: #fff; }
     .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
     .btn-cancel { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #ddd; background: transparent; color: #888; font-size: 15px; cursor: pointer; }
@@ -117,14 +130,23 @@ var INITIAL_CARDS = [
   { id: 5, fr: "la pomme", it: "la mela", emoji: "🍎" }
 ];
 
+// Chargement + normalisation (compatibilité anciens exports)
 var raw = JSON.parse(localStorage.getItem("fc_cards") || "null") || INITIAL_CARDS;
 var cards = raw.map(function(c) {
-  // Garde l'emoji uniquement pour les 5 cartes par défaut, nettoie tout le reste
   var emoji = (c.id >= 1 && c.id <= 5) ? cleanEmoji(c.emoji) : null;
-  return Object.assign({}, c, { emoji: emoji });
+  return {
+    id: c.id,
+    fr: c.fr,
+    it: c.it,
+    emoji: emoji,
+    example: c.example || null,
+    example2: c.example2 || null,
+    archived: c.archived === true
+  };
 });
 var scores = JSON.parse(localStorage.getItem("fc_scores") || "{}");
 var nextId = Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1;
+
 var deck = [], idx = 0, flipped = false;
 var sessionRight = 0, sessionWrong = 0;
 var view = "study";
@@ -132,6 +154,8 @@ var pressTimer = null;
 var btnPressTimer = null;
 var lastCardId = null;
 var searchQuery = "";
+var masteredOpen = false;
+var reviewMode = false; // true = on révise les cartes maîtrisées
 
 function save() {
   localStorage.setItem("fc_cards", JSON.stringify(cards));
@@ -140,6 +164,7 @@ function save() {
 save();
 
 function isCardActive(c) {
+  if (c.archived) return false;
   var s = scores[c.id];
   if (!s) return true;
   if (s.sidelined && Date.now() < s.sidelined) return false;
@@ -147,16 +172,18 @@ function isCardActive(c) {
 }
 
 function buildDeck() {
-  var n = cards.length;
+  var pool = cards.filter(function(c){ return reviewMode ? c.archived : isCardActive(c); });
+  var n = pool.length;
   var d = [];
-  cards.forEach(function(c, i) {
-    if (!isCardActive(c)) return;
+  pool.forEach(function(c, i) {
     var s = scores[c.id] || { right: 0, wrong: 0 };
     var w = Math.max(1, 1 + (s.wrong||0) * 2 - (s.right||0));
-    if (s.priority && Date.now() < s.priority) w *= 3;
-    var rank = n - i;
-    if (rank <= 10) w *= 3;
-    else if (rank <= 30) w *= 2;
+    if (!reviewMode && s.priority && Date.now() < s.priority) w *= 3;
+    if (!reviewMode) {
+      var rank = n - i;
+      if (rank <= 10) w *= 3;
+      else if (rank <= 30) w *= 2;
+    }
     for (var j = 0; j < w; j++) d.push(Object.assign({}, c, { reversed: Math.random() < 0.2 }));
   });
   for (var i2 = d.length - 1; i2 > 0; i2--) {
@@ -168,6 +195,7 @@ function buildDeck() {
 
 function render() {
   var root = document.getElementById("root");
+  document.body.className = (view === "study" && reviewMode) ? "review-mode" : "";
   var total = sessionRight + sessionWrong;
   var pct = total ? Math.round(sessionRight / total * 100) : null;
   var card = deck[idx];
@@ -182,6 +210,9 @@ function render() {
   html += "</div>";
 
   if (view === "study") {
+    if (reviewMode) {
+      html += "<div class='review-banner'><span>⭐ Révision des cartes maîtrisées</span><button onclick='exitReview()'>Quitter</button></div>";
+    }
     html += "<div class='session-bar'>";
     html += "<span>Session : " + total + " cartes</span>";
     html += "<span style='color:" + (pct===null?"#888":(pct>=70?"#009246":"#CE2B37")) + "'>" + (pct===null?"Commence !":pct+"% réussi") + "</span>";
@@ -206,6 +237,7 @@ function render() {
       html += "<div class='card-word'>" + back + "</div>";
       html += "<div class='card-sub'>" + front + "</div>";
       if (card.example) html += "<div class='card-example'>« " + esc(card.example) + " »</div>";
+      if (card.example2) html += "<div class='card-example'>« " + esc(card.example2) + " »</div>";
       html += "</div>";
       html += "</div>";
       html += "</div>";
@@ -216,7 +248,11 @@ function render() {
       html += "</div>";
       html += "<p id='btn-hint' class='btn-hint' style='display:" + (flipped?"block":"none") + "'>Appui long sur un bouton pour plus d'options</p>";
     } else {
-      html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte disponible.</p>";
+      if (reviewMode) {
+        html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte maîtrisée à réviser.<br><button onclick='exitReview()' style='margin-top:12px;padding:10px 18px;border-radius:12px;border:1.5px solid #009246;background:transparent;color:#009246;font-size:15px;cursor:pointer'>Retour au jeu normal</button></p>";
+      } else {
+        html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte disponible.</p>";
+      }
     }
   }
 
@@ -226,42 +262,64 @@ function render() {
     html += "<input class='form-input' id='inp-fr' placeholder='ex : le vélo' />";
     html += "<label class='form-label'>Traduction italienne</label>";
     html += "<input class='form-input' id='inp-it' placeholder='ex : la bicicletta' />";
-    html += "<label class='form-label'>Phrase d'exemple <span style='color:#bbb'>(facultatif)</span></label>";
-    html += "<input class='form-input' id='inp-ex' placeholder='ex : Vado a scuola in bicicletta' onkeydown=\"if(event.key==='Enter')addCard()\" />";
+    html += "<label class='form-label'>Phrase d'exemple 1 <span style='color:#bbb;font-weight:400'>(facultatif)</span></label>";
+    html += "<input class='form-input' id='inp-ex' placeholder='ex : Vado a scuola in bicicletta' />";
+    html += "<label class='form-label'>Phrase d'exemple 2 <span style='color:#bbb;font-weight:400'>(facultatif)</span></label>";
+    html += "<input class='form-input' id='inp-ex2' placeholder='ex : Mi piace la bicicletta rossa' onkeydown=\"if(event.key==='Enter')addCard()\" />";
     html += "<button class='btn-add' onclick='addCard()'>Ajouter la carte</button>";
     html += "<div id='add-msg' class='add-msg'></div>";
     html += "</div>";
   }
 
   if (view === "stats") {
+    var activeCards = cards.filter(function(c){ return !c.archived; });
+    var masteredCards = cards.filter(function(c){ return c.archived; });
+
     html += "<div class='deck-top'>";
     html += "<input class='search-box' id='search-input' placeholder='🔍 Rechercher un mot...' value=\"" + esc(searchQuery) + "\" oninput='updateSearch(this.value)' />";
-    html += "<div class='stat-card-single'><div class='stat-label'>Cartes</div><div class='stat-val'>" + cards.length + "</div></div>";
     html += "</div>";
 
-    html += "<div class='export-btns' style='margin-bottom:16px'>";
+    html += "<div class='export-btns'>";
     html += "<button class='btn-export' onclick='exportCards()'>⬇ Exporter</button>";
     html += "<button class='btn-import' onclick=\"document.getElementById('import-input').click()\">⬆ Importer</button>";
     html += "</div>";
 
-    html += "<div class='stats-list'><p class='stats-title'>Cartes dans le deck <span style='font-size:12px;color:#aaa;font-weight:400'>(appui long pour modifier)</span></p>";
-    html += "<div id='deck-list'>" + buildDeckListHtml() + "</div>";
+    // Bloc Deck actif
+    html += "<div class='list-block'>";
+    html += "<div class='list-header'><span class='list-title'>Deck actif <span class='count'>(" + activeCards.length + ")</span> <span class='hint'>· appui long pour options</span></span></div>";
+    html += "<div class='list-scroll' id='active-list'>" + buildListHtml(false) + "</div>";
+    html += "</div>";
+
+    // Bloc Cartes maîtrisées (repliable)
+    html += "<div class='list-block mastered-block'>";
+    html += "<div class='list-header'>";
+    html += "<span class='list-title'>⭐ Cartes maîtrisées <span class='count' style='color:#9a7524'>(" + masteredCards.length + ")</span></span>";
+    html += "<button class='collapse-btn' onclick='toggleMastered()'>" + (masteredOpen ? "Masquer ▲" : "Afficher ▼") + "</button>";
+    html += "</div>";
+    if (masteredOpen) {
+      if (masteredCards.length > 0) {
+        html += "<button class='btn-review-mastered' onclick='startReview()'>▶ Réviser les cartes maîtrisées</button>";
+      }
+      html += "<div class='list-scroll' id='mastered-list'>" + buildListHtml(true) + "</div>";
+    }
     html += "</div>";
   }
 
   root.innerHTML = html;
 }
 
-function buildDeckListHtml() {
-  var filtered = cards;
+function buildListHtml(archived) {
+  var list = cards.filter(function(c){ return archived ? c.archived : !c.archived; });
+  // Récentes en haut
+  list = list.slice().sort(function(a, b){ return b.id - a.id; });
   if (searchQuery) {
     var q = searchQuery.toLowerCase();
-    filtered = cards.filter(function(c) {
+    list = list.filter(function(c) {
       return c.fr.toLowerCase().indexOf(q) !== -1 || c.it.toLowerCase().indexOf(q) !== -1;
     });
   }
   var html = "";
-  filtered.forEach(function(c) {
+  list.forEach(function(c) {
     var s = scores[c.id] || {};
     var hist = (s.history || []).slice(-5);
     var dotsHtml = "";
@@ -271,7 +329,7 @@ function buildDeckListHtml() {
     }
     var isSidelined = s.sidelined && Date.now() < s.sidelined;
     var isPriority = s.priority && Date.now() < s.priority;
-    var badge = isSidelined ? " 💤" : (isPriority ? " 🔥" : "");
+    var badge = archived ? "" : (isSidelined ? " 💤" : (isPriority ? " 🔥" : ""));
 
     html += "<div class='stat-row'>";
     html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + esc(c.fr) + " → " + esc(c.it) + badge + "</span>";
@@ -279,15 +337,19 @@ function buildDeckListHtml() {
     html += "<button onclick='deleteCard(" + c.id + ")' style='background:none;border:none;cursor:pointer;font-size:16px;padding:2px 4px;color:#ccc'>🗑️</button>";
     html += "</div>";
   });
-  if (filtered.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>Aucun résultat</p>";
+  if (list.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>" + (archived ? "Aucune carte maîtrisée" : "Aucune carte") + "</p>";
   return html;
 }
 
 function updateSearch(val) {
   searchQuery = val;
-  var list = document.getElementById("deck-list");
-  if (list) list.innerHTML = buildDeckListHtml();
+  var a = document.getElementById("active-list");
+  if (a) a.innerHTML = buildListHtml(false);
+  var m = document.getElementById("mastered-list");
+  if (m) m.innerHTML = buildListHtml(true);
 }
+
+function toggleMastered() { masteredOpen = !masteredOpen; render(); }
 
 function setView(v) { searchQuery = ""; view = v; render(); }
 
@@ -315,16 +377,12 @@ function startBtnPress() {
     showAnswerOptions();
   }, 600);
 }
-
 function cancelBtnPress() {
   if (btnPressTimer !== "long") clearTimeout(btnPressTimer);
 }
 
 function flashBtn(id, correct) {
-  if (btnPressTimer === "long") {
-    btnPressTimer = null;
-    return;
-  }
+  if (btnPressTimer === "long") { btnPressTimer = null; return; }
   clearTimeout(btnPressTimer);
   btnPressTimer = null;
   var btn = document.getElementById(id);
@@ -351,36 +409,29 @@ function answer(correct) {
   });
   if (correct) sessionRight++; else sessionWrong++;
   save(); buildDeck();
-  // Anti-répétition : cherche en priorité une carte différente de la précédente
   var pool = Math.min(deck.length, 5);
   var candidates = [];
-  for (var ci = 0; ci < pool; ci++) {
-    if (deck[ci].id !== lastCardId) candidates.push(ci);
-  }
+  for (var ci = 0; ci < pool; ci++) if (deck[ci].id !== lastCardId) candidates.push(ci);
   if (candidates.length === 0) {
-    // Élargit la recherche à tout le deck
-    for (var cj = 0; cj < deck.length; cj++) {
-      if (deck[cj].id !== lastCardId) candidates.push(cj);
-    }
+    for (var cj = 0; cj < deck.length; cj++) if (deck[cj].id !== lastCardId) candidates.push(cj);
   }
-  if (candidates.length > 0) {
-    idx = candidates[Math.floor(Math.random() * candidates.length)];
-  } else {
-    idx = 0; // une seule carte dans le deck, pas le choix
-  }
+  idx = candidates.length > 0 ? candidates[Math.floor(Math.random() * candidates.length)] : 0;
   flipped = false; render();
 }
 
 function addCard() {
-  var frEl = document.getElementById("inp-fr");
-  var itEl = document.getElementById("inp-it");
-  var exEl = document.getElementById("inp-ex");
-  var msg  = document.getElementById("add-msg");
-  var fr = frEl.value.trim(), it = itEl.value.trim(), ex = exEl.value.trim();
+  var fr = document.getElementById("inp-fr").value.trim();
+  var it = document.getElementById("inp-it").value.trim();
+  var ex = document.getElementById("inp-ex").value.trim();
+  var ex2 = document.getElementById("inp-ex2").value.trim();
+  var msg = document.getElementById("add-msg");
   if (!fr || !it) { msg.className = "add-msg err"; msg.textContent = "Remplis au moins le mot et sa traduction."; return; }
-  cards.push({ id: nextId++, fr: fr, it: it, example: ex || null, emoji: null });
+  cards.push({ id: nextId++, fr: fr, it: it, example: ex || null, example2: ex2 || null, emoji: null, archived: false });
   save(); buildDeck();
-  frEl.value = ""; itEl.value = ""; exEl.value = "";
+  document.getElementById("inp-fr").value = "";
+  document.getElementById("inp-it").value = "";
+  document.getElementById("inp-ex").value = "";
+  document.getElementById("inp-ex2").value = "";
   msg.className = "add-msg ok";
   msg.textContent = "Carte \"" + fr + "\" ajoutée !";
 }
@@ -403,13 +454,16 @@ function openEditModal(id) {
   var modal = document.getElementById("modal-container");
   modal.innerHTML =
     "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
+    "<button class='modal-close' onclick='closeModal()'>×</button>" +
     "<h3>✏️ Modifier la carte</h3>" +
     "<label class='form-label'>Mot en français</label>" +
     "<input class='form-input' id='edit-fr' value=\"" + esc(c.fr) + "\" />" +
     "<label class='form-label'>Traduction italienne</label>" +
     "<input class='form-input' id='edit-it' value=\"" + esc(c.it) + "\" />" +
-    "<label class='form-label'>Phrase d'exemple <span style='color:#bbb'>(facultatif)</span></label>" +
+    "<label class='form-label'>Phrase d'exemple 1</label>" +
     "<input class='form-input' id='edit-ex' value=\"" + esc(c.example) + "\" />" +
+    "<label class='form-label'>Phrase d'exemple 2</label>" +
+    "<input class='form-input' id='edit-ex2' value=\"" + esc(c.example2) + "\" />" +
     "<div class='modal-btns'>" +
     "<button class='btn-cancel' onclick='closeModal()'>Annuler</button>" +
     "<button class='btn-save' onclick='saveEdit(" + id + ")'>Enregistrer</button>" +
@@ -422,10 +476,11 @@ function saveEdit(id) {
   var fr = document.getElementById("edit-fr").value.trim();
   var it = document.getElementById("edit-it").value.trim();
   var ex = document.getElementById("edit-ex").value.trim();
+  var ex2 = document.getElementById("edit-ex2").value.trim();
   if (!fr || !it) return;
   var i = cards.findIndex(function(c){ return c.id === id; });
   if (i === -1) return;
-  cards[i] = Object.assign({}, cards[i], { fr: fr, it: it, example: ex || null });
+  cards[i] = Object.assign({}, cards[i], { fr: fr, it: it, example: ex || null, example2: ex2 || null });
   save(); buildDeck(); closeModal(); render();
 }
 
@@ -434,15 +489,27 @@ function showAnswerOptions() {
   if (!card) return;
   var cardId = card.id;
   var modal = document.getElementById("modal-container");
-  modal.innerHTML =
-    "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
-    "<h3>Options pour cette carte</h3>" +
-    "<p class='modal-desc'>Mettre de côté : la carte disparaît du deck pendant 1 mois, puis revient automatiquement.<br>Priorité maximale : la carte apparaît 3× plus souvent pendant 7 jours.</p>" +
-    "<button class='modal-option sideline' id='opt-sideline' onclick=\"flashOption('opt-sideline','flash-blue', function(){ sidelineCard(" + cardId + "); })\">Mettre de côté 1 mois 💤</button>" +
-    "<button class='modal-option priority' id='opt-priority' onclick=\"flashOption('opt-priority','flash-orange', function(){ prioritizeCard(" + cardId + "); })\">Priorité maximale 7 jours 🔥</button>" +
-    "<button class='modal-option danger' id='opt-delete' onclick=\"flashOption('opt-delete','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">Supprimer la carte du deck</button>" +
-    "<button class='modal-option neutral' id='opt-cancel' onclick=\"flashOption('opt-cancel','flash-grey', function(){ closeModal(); })\">Continuer normalement</button>" +
-    "</div></div>";
+  if (reviewMode) {
+    modal.innerHTML =
+      "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
+      "<button class='modal-close' onclick='closeModal()'>×</button>" +
+      "<h3>Options pour cette carte</h3>" +
+      "<p class='modal-desc'>Remettre dans le deck actif : la carte quitte les maîtrisées et redevient une carte de jeu normale.</p>" +
+      "<button class='modal-option reactivate' id='opt-react' onclick=\"flashOption('opt-react','flash-green', function(){ reactivateCard(" + cardId + "); })\">Remettre dans le deck actif</button>" +
+      "<button class='modal-option danger' id='opt-del' onclick=\"flashOption('opt-del','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">Supprimer la carte</button>" +
+      "</div></div>";
+  } else {
+    modal.innerHTML =
+      "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
+      "<button class='modal-close' onclick='closeModal()'>×</button>" +
+      "<h3>Options pour cette carte</h3>" +
+      "<p class='modal-desc'>Mettre de côté : disparaît 1 mois puis revient.<br>Priorité maximale : apparaît 3× plus souvent 7 jours.<br>Archiver : place la carte dans les cartes maîtrisées.</p>" +
+      "<button class='modal-option sideline' id='opt-sideline' onclick=\"flashOption('opt-sideline','flash-blue', function(){ sidelineCard(" + cardId + "); })\">Mettre de côté 1 mois 💤</button>" +
+      "<button class='modal-option priority' id='opt-priority' onclick=\"flashOption('opt-priority','flash-orange', function(){ prioritizeCard(" + cardId + "); })\">Priorité maximale 7 jours 🔥</button>" +
+      "<button class='modal-option archive' id='opt-archive' onclick=\"flashOption('opt-archive','flash-gold', function(){ archiveCard(" + cardId + "); })\">Archiver dans les maîtrisées ⭐</button>" +
+      "<button class='modal-option danger' id='opt-delete' onclick=\"flashOption('opt-delete','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">Supprimer la carte du deck</button>" +
+      "</div></div>";
+  }
 }
 
 function flashOption(id, flashClass, callback) {
@@ -453,20 +520,40 @@ function flashOption(id, flashClass, callback) {
 
 function sidelineCard(id) {
   var prev = scores[id] || { right: 0, wrong: 0, history: [] };
-  scores[id] = Object.assign({}, prev, { sidelined: Date.now() + 30 * 24 * 60 * 60 * 1000 });
+  scores[id] = Object.assign({}, prev, { sidelined: Date.now() + 30*24*60*60*1000 });
   save(); buildDeck(); closeModal(); render();
 }
-
 function prioritizeCard(id) {
   var prev = scores[id] || { right: 0, wrong: 0, history: [] };
-  scores[id] = Object.assign({}, prev, { priority: Date.now() + 7 * 24 * 60 * 60 * 1000 });
+  scores[id] = Object.assign({}, prev, { priority: Date.now() + 7*24*60*60*1000 });
   save(); buildDeck(); closeModal(); render();
 }
-
+function archiveCard(id) {
+  var i = cards.findIndex(function(c){ return c.id === id; });
+  if (i !== -1) cards[i].archived = true;
+  save(); buildDeck(); closeModal(); render();
+}
+function reactivateCard(id) {
+  var i = cards.findIndex(function(c){ return c.id === id; });
+  if (i !== -1) cards[i].archived = false;
+  save(); buildDeck(); closeModal(); render();
+}
 function deleteCardAndNext(id) {
   cards = cards.filter(function(c){ return c.id !== id; });
   delete scores[id];
   save(); buildDeck(); closeModal(); render();
+}
+
+function startReview() {
+  reviewMode = true;
+  view = "study";
+  sessionRight = 0; sessionWrong = 0;
+  buildDeck(); render();
+}
+function exitReview() {
+  reviewMode = false;
+  sessionRight = 0; sessionWrong = 0;
+  buildDeck(); render();
 }
 
 function exportCards() {
@@ -486,7 +573,15 @@ function importCards(e) {
     try {
       var data = JSON.parse(ev.target.result);
       if (data.cards && Array.isArray(data.cards)) {
-        cards = data.cards.map(function(c){ return Object.assign({}, c, { emoji: cleanEmoji(c.emoji) }); });
+        cards = data.cards.map(function(c){
+          var emoji = (c.id >= 1 && c.id <= 5) ? cleanEmoji(c.emoji) : null;
+          return {
+            id: c.id, fr: c.fr, it: c.it, emoji: emoji,
+            example: c.example || null,
+            example2: c.example2 || null,
+            archived: c.archived === true
+          };
+        });
         scores = data.scores || {};
         nextId = Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1;
         save(); buildDeck(); render();

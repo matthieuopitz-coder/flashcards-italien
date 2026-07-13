@@ -111,7 +111,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.05</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.06</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" onchange="importCards(event)" />
 
 <script>
@@ -307,7 +307,7 @@ function render() {
     // Bloc Cartes maîtrisées (repliable)
     html += "<div class='list-block mastered-block'>";
     html += "<div class='list-header'>";
-    html += "<span class='list-title'>Cartes maîtrisées <span class='count' style='color:#9a7524'>(" + masteredCards.length + ")</span></span>";
+    html += "<span class='list-title'>Cartes archivées <span class='count' style='color:#9a7524'>(" + masteredCards.length + ")</span></span>";
     html += "<button class='collapse-btn' onclick='toggleMastered()'>" + (masteredOpen ? "Masquer ▲" : "Afficher ▼") + "</button>";
     html += "</div>";
     if (masteredOpen) {
@@ -503,11 +503,11 @@ function openRowMenu(id, archived) {
   var opts = "";
   if (archived) {
     opts += "<button class='modal-option' onclick='openEditModal(" + id + ")'>✏️ Modifier la carte</button>";
-    opts += "<button class='modal-option reactivate' id='rm-react' onclick=\"flashOption('rm-react','flash-green', function(){ reactivateCard(" + id + "); })\">Remettre dans le deck actif</button>";
+    opts += "<button class='modal-option reactivate' id='rm-react' onclick=\"flashOption('rm-react','flash-green', function(){ reactivateCard(" + id + "); })\">Remettre la carte en jeu</button>";
     opts += "<button class='modal-option danger' id='rm-del' onclick=\"flashOption('rm-del','flash-red', function(){ deleteFromMenu(" + id + "); })\">Supprimer la carte</button>";
   } else {
     opts += "<button class='modal-option' onclick='openEditModal(" + id + ")'>✏️ Modifier la carte</button>";
-    opts += "<button class='modal-option archive' id='rm-arch' onclick=\"flashOption('rm-arch','flash-gold', function(){ archiveCard(" + id + "); })\">Archiver dans les « Archivées »</button>";
+    opts += "<button class='modal-option archive' id='rm-arch' onclick=\"flashOption('rm-arch','flash-gold', function(){ archiveCard(" + id + "); })\">Archiver la carte</button>";
     opts += "<button class='modal-option danger' id='rm-del' onclick=\"flashOption('rm-del','flash-red', function(){ deleteFromMenu(" + id + "); })\">Supprimer la carte</button>";
   }
   modal.innerHTML =
@@ -546,8 +546,8 @@ function showAnswerOptions() {
       "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
       "<button class='modal-close' onclick='closeModal()'>×</button>" +
       "<h3>Options pour cette carte</h3>" +
-      "<p class='modal-desc'>Remettre dans le deck actif : la carte quitte les archivées et redevient une carte de jeu normale.</p>" +
-      "<button class='modal-option reactivate' id='opt-react' onclick=\"flashOption('opt-react','flash-green', function(){ reactivateCard(" + cardId + "); })\">Remettre dans le deck actif</button>" +
+      "<p class='modal-desc'>Remettre la carte en jeu : la carte quitte les archivées et redevient une carte de jeu normale.</p>" +
+      "<button class='modal-option reactivate' id='opt-react' onclick=\"flashOption('opt-react','flash-green', function(){ reactivateCard(" + cardId + "); })\">Remettre la carte en jeu</button>" +
       "<button class='modal-option danger' id='opt-del' onclick=\"flashOption('opt-del','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">Supprimer la carte</button>" +
       "</div></div>";
   } else {
@@ -558,7 +558,7 @@ function showAnswerOptions() {
       "<p class='modal-desc'>Mettre de côté : disparaît 1 mois puis revient.<br>Priorité maximale : apparaît 3× plus souvent 7 jours.<br>Archiver : place la carte dans les cartes archivées.</p>" +
       "<button class='modal-option sideline' id='opt-sideline' onclick=\"flashOption('opt-sideline','flash-blue', function(){ sidelineCard(" + cardId + "); })\">Mettre de côté 1 mois 💤</button>" +
       "<button class='modal-option priority' id='opt-priority' onclick=\"flashOption('opt-priority','flash-orange', function(){ prioritizeCard(" + cardId + "); })\">Priorité maximale 7 jours 🔥</button>" +
-      "<button class='modal-option archive' id='opt-archive' onclick=\"flashOption('opt-archive','flash-gold', function(){ archiveCard(" + cardId + "); })\">Archiver dans les « Archivées »</button>" +
+      "<button class='modal-option archive' id='opt-archive' onclick=\"flashOption('opt-archive','flash-gold', function(){ archiveCard(" + cardId + "); })\">Archiver la carte</button>" +
       "<button class='modal-option danger' id='opt-delete' onclick=\"flashOption('opt-delete','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">Supprimer la carte du deck</button>" +
       "</div></div>";
   }

@@ -15,7 +15,7 @@
     body { font-family: system-ui, sans-serif; background: #f5f5f0; min-height: 100vh; touch-action: manipulation; }
     body.review-mode { background: #f3ecdd; }
     #root { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem 3rem 1rem; }
-    h2 { text-align: center; font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+    h2 { text-align: center; font-size: 22px; font-weight: 500; margin-bottom: 20px; }
     .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 20px; }
     .tabs { display: flex; justify-content: center; gap: 6px; margin-bottom: 24px; }
     .tab { padding: 9px 20px; border-radius: 20px; border: none; cursor: pointer; font-size: 16px; font-weight: 500; background: transparent; color: #555; transition: all 0.2s; }
@@ -44,8 +44,8 @@
     .card-lang { font-size: 26px; letter-spacing: 4px; }
     .card-hint { font-size: 13px; color: #bbb; margin-top: 2px; }
 
-    .review-banner { text-align: center; background: #e8dab5; color: #7a5c1a; font-size: 14px; font-weight: 500; padding: 8px 12px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .review-banner button { background: none; border: none; color: #7a5c1a; font-size: 14px; cursor: pointer; text-decoration: underline; }
+    .review-banner { text-align: center; background: #e8dab5; color: #7a5c1a; font-size: 16px; font-weight: 500; padding: 8px 12px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .review-banner button { background: none; border: none; color: #7a5c1a; font-size: 16px; cursor: pointer; text-decoration: underline; }
 
     .answer-btns { display: flex; gap: 12px; margin-bottom: 6px; }
     .btn-wrong { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #CE2B37; background: transparent; color: #CE2B37; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
@@ -54,7 +54,7 @@
     .btn-right.flash { background: #009246; color: #fff; }
     .btn-hint { text-align: center; font-size: 12px; color: #a0a0a0; margin-top: 2px; }
 
-    .form-card { background: #fff; border: 0.5px solid #ddd; border-radius: 16px; padding: 1.5rem; margin-bottom: 16px; }
+    .form-card { background: #fff; border: 1px solid #ccc; border-radius: 16px; padding: 1.5rem; margin-bottom: 16px; }
     .form-label { font-size: 16px; color: #444; font-weight: 600; display: block; margin-bottom: 4px; }
     .form-input { width: 100%; padding: 11px 13px; border: 0.5px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 14px; outline: none; background: #f7f7f4; }
     .form-input:focus { border-color: #009246; background: #fff; }
@@ -72,7 +72,7 @@
 
     .list-block { background: #fff; border: 1px solid #999; border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 16px; }
     .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .list-title { font-size: 15px; font-weight: 600; }
+    .list-title { font-size: 17px; font-weight: 600; }
     .list-title .count { color: #009246; font-weight: 600; }
     .list-title .hint { font-size: 12px; color: #aaa; font-weight: 400; }
     .list-scroll { max-height: 320px; overflow-y: auto; }
@@ -86,7 +86,7 @@
     body.review-mode .footer { background: #f3ecdd; }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
-    .modal { background: #fff; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; position: relative; }
+    .modal { background: #fff; border: 1px solid #ccc; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; position: relative; }
     .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; padding-right: 30px; }
     .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 22px; color: #aaa; cursor: pointer; line-height: 1; }
     .modal-desc { font-size: 13px; color: #aaa; margin-bottom: 16px; line-height: 1.4; }
@@ -204,11 +204,10 @@ function render() {
 
   var html = "";
   html += "<h2>🇮🇹 Flashcards Italien</h2>";
-  html += "<p class='subtitle'>Français → Italien</p>";
   html += "<div class='tabs'>";
   html += "<button class='tab " + (view==="study"?"active":"") + "' onclick=\"setView('study')\">Étudier</button>";
   html += "<button class='tab " + (view==="add"?"active":"") + "' onclick=\"setView('add')\">Ajouter</button>";
-  html += "<button class='tab " + (view==="stats"?"active":"") + "' onclick=\"setView('stats')\">Deck</button>";
+  html += "<button class='tab " + (view==="stats"?"active":"") + "' onclick=\"setView('stats')\">Cartes</button>";
   html += "</div>";
 
   if (view === "study") {
@@ -288,19 +287,19 @@ function render() {
 
     // Bloc Deck actif
     html += "<div class='list-block'>";
-    html += "<div class='list-header'><span class='list-title'>Deck actif <span class='count'>(" + activeCards.length + ")</span> <span class='hint'>· appui long pour options</span></span></div>";
+    html += "<div class='list-header'><span class='list-title'>Cartes en jeu <span class='count'>(" + activeCards.length + ")</span></span></div>";
     html += "<div class='list-scroll' id='active-list'>" + buildListHtml(false) + "</div>";
     html += "</div>";
 
     // Bloc Cartes maîtrisées (repliable)
     html += "<div class='list-block mastered-block'>";
     html += "<div class='list-header'>";
-    html += "<span class='list-title'>⭐ Cartes maîtrisées <span class='count' style='color:#9a7524'>(" + masteredCards.length + ")</span></span>";
+    html += "<span class='list-title'>Cartes maîtrisées <span class='count' style='color:#9a7524'>(" + masteredCards.length + ")</span></span>";
     html += "<button class='collapse-btn' onclick='toggleMastered()'>" + (masteredOpen ? "Masquer ▲" : "Afficher ▼") + "</button>";
     html += "</div>";
     if (masteredOpen) {
       if (masteredCards.length > 0) {
-        html += "<button class='btn-review-mastered' onclick='startReview()'>▶ Réviser les cartes maîtrisées</button>";
+        html += "<button class='btn-review-mastered' id='btn-review' onclick='startReviewDelayed()'>▶ Réviser les cartes maîtrisées</button>";
       }
       html += "<div class='list-scroll' id='mastered-list'>" + buildListHtml(true) + "</div>";
     }
@@ -336,7 +335,7 @@ function buildListHtml(archived) {
     html += "<div class='stat-row'>";
     html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + esc(c.fr) + " → " + esc(c.it) + badge + "</span>";
     html += "<span style='white-space:nowrap'>" + dotsHtml + "</span>";
-    html += "<button onclick='openRowMenu(" + c.id + "," + (archived ? "true" : "false") + ")' style='background:none;border:none;cursor:pointer;font-size:22px;padding:0 4px;color:#999;line-height:1'>+</button>";
+    html += "<button onclick='openRowMenu(" + c.id + "," + (archived ? "true" : "false") + ")' style='background:#f0f0eb;border:1px solid #bbb;border-radius:8px;cursor:pointer;font-size:22px;width:32px;height:32px;padding:0;color:#666;line-height:1;display:flex;align-items:center;justify-content:center'>+</button>";
     html += "</div>";
   });
   if (list.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>" + (archived ? "Aucune carte maîtrisée" : "Aucune carte") + "</p>";
@@ -572,6 +571,16 @@ function deleteCardAndNext(id) {
   cards = cards.filter(function(c){ return c.id !== id; });
   delete scores[id];
   save(); buildDeck(); closeModal(); render();
+}
+
+function startReviewDelayed() {
+  var btn = document.getElementById("btn-review");
+  if (btn) {
+    btn.style.transition = "background 0.15s, color 0.15s";
+    btn.style.background = "#C79A3B";
+    btn.style.color = "#fff";
+  }
+  setTimeout(startReview, 350);
 }
 
 function startReview() {

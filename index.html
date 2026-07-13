@@ -124,6 +124,11 @@ function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
+// Comme esc, mais autorise un retour à la ligne après chaque "/" (séparateur de synonymes)
+function escWrap(s) {
+  return esc(s).replace(/\//g, "/<wbr>");
+}
+
 var INITIAL_CARDS = [
   { id: 1, fr: "le chat", it: "il gatto", emoji: "🐱" },
   { id: 2, fr: "le chien", it: "il cane", emoji: "🐶" },
@@ -196,6 +201,13 @@ function buildDeck() {
 }
 
 function render() {
+  // Mémorise les positions de défilement des listes avant reconstruction
+  var savedScroll = {};
+  var al = document.getElementById("active-list");
+  var ml = document.getElementById("mastered-list");
+  if (al) savedScroll.active = al.scrollTop;
+  if (ml) savedScroll.mastered = ml.scrollTop;
+
   var root = document.getElementById("root");
   document.body.className = (view === "study" && reviewMode) ? "review-mode" : "";
   var total = sessionRight + sessionWrong;
@@ -212,7 +224,7 @@ function render() {
 
   if (view === "study") {
     if (reviewMode) {
-      html += "<div class='review-banner'><span>⭐ Révision des cartes maîtrisées</span><button onclick='exitReview()'>Quitter</button></div>";
+      html += "<div class='review-banner'><span>Révision des cartes archivées</span><button onclick='exitReview()'>Quitter</button></div>";
     }
     html += "<div class='session-bar'>";
     html += "<span>Session : " + total + " cartes</span>";
@@ -220,8 +232,8 @@ function render() {
     html += "</div>";
 
     if (card) {
-      var front = esc(card.reversed ? card.it : card.fr);
-      var back  = esc(card.reversed ? card.fr : card.it);
+      var front = escWrap(card.reversed ? card.it : card.fr);
+      var back  = escWrap(card.reversed ? card.fr : card.it);
       var lang  = card.reversed ? "🇮🇹 → 🇫🇷" : "🇫🇷 → 🇮🇹";
       var e = card.emoji;
 
@@ -250,7 +262,7 @@ function render() {
       html += "<p id='btn-hint' class='btn-hint' style='display:" + (flipped?"block":"none") + "'>Appui long sur un bouton pour plus d'options</p>";
     } else {
       if (reviewMode) {
-        html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte maîtrisée à réviser.<br><button onclick='exitReview()' style='margin-top:12px;padding:10px 18px;border-radius:12px;border:1.5px solid #009246;background:transparent;color:#009246;font-size:15px;cursor:pointer'>Retour au jeu normal</button></p>";
+        html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte archivée à réviser.<br><button onclick='exitReview()' style='margin-top:12px;padding:10px 18px;border-radius:12px;border:1.5px solid #009246;background:transparent;color:#009246;font-size:15px;cursor:pointer'>Retour au jeu normal</button></p>";
       } else {
         html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte disponible.</p>";
       }
@@ -307,6 +319,12 @@ function render() {
   }
 
   root.innerHTML = html;
+
+  // Restaure les positions de défilement
+  var al2 = document.getElementById("active-list");
+  var ml2 = document.getElementById("mastered-list");
+  if (al2 && savedScroll.active) al2.scrollTop = savedScroll.active;
+  if (ml2 && savedScroll.mastered) ml2.scrollTop = savedScroll.mastered;
 }
 
 function buildListHtml(archived) {
@@ -335,10 +353,10 @@ function buildListHtml(archived) {
     html += "<div class='stat-row'>";
     html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + esc(c.fr) + " → " + esc(c.it) + badge + "</span>";
     html += "<span style='white-space:nowrap'>" + dotsHtml + "</span>";
-    html += "<button onclick='openRowMenu(" + c.id + "," + (archived ? "true" : "false") + ")' style='background:#f0f0eb;border:1px solid #bbb;border-radius:8px;cursor:pointer;font-size:22px;width:32px;height:32px;padding:0;color:#666;line-height:1;display:flex;align-items:center;justify-content:center'>+</button>";
+    html += "<button onclick='openRowMenu(" + c.id + "," + (archived ? "true" : "false") + ")' style='background:#f0f0eb;border:1px solid #bbb;border-radius:7px;cursor:pointer;font-size:19px;width:27px;height:27px;padding:0;color:#666;line-height:1;display:flex;align-items:center;justify-content:center'>+</button>";
     html += "</div>";
   });
-  if (list.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>" + (archived ? "Aucune carte maîtrisée" : "Aucune carte") + "</p>";
+  if (list.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>" + (archived ? "Aucune carte archivée" : "Aucune carte") + "</p>";
   return html;
 }
 
@@ -484,7 +502,7 @@ function openRowMenu(id, archived) {
     opts += "<button class='modal-option danger' id='rm-del' onclick=\"flashOption('rm-del','flash-red', function(){ deleteFromMenu(" + id + "); })\">Supprimer la carte</button>";
   } else {
     opts += "<button class='modal-option' onclick='openEditModal(" + id + ")'>✏️ Modifier la carte</button>";
-    opts += "<button class='modal-option archive' id='rm-arch' onclick=\"flashOption('rm-arch','flash-gold', function(){ archiveCard(" + id + "); })\">Archiver dans les « Maîtrisées » ⭐</button>";
+    opts += "<button class='modal-option archive' id='rm-arch' onclick=\"flashOption('rm-arch','flash-gold', function(){ archiveCard(" + id + "); })\">Archiver dans les « Archivées »</button>";
     opts += "<button class='modal-option danger' id='rm-del' onclick=\"flashOption('rm-del','flash-red', function(){ deleteFromMenu(" + id + "); })\">Supprimer la carte</button>";
   }
   modal.innerHTML =
@@ -523,7 +541,7 @@ function showAnswerOptions() {
       "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
       "<button class='modal-close' onclick='closeModal()'>×</button>" +
       "<h3>Options pour cette carte</h3>" +
-      "<p class='modal-desc'>Remettre dans le deck actif : la carte quitte les maîtrisées et redevient une carte de jeu normale.</p>" +
+      "<p class='modal-desc'>Remettre dans le deck actif : la carte quitte les archivées et redevient une carte de jeu normale.</p>" +
       "<button class='modal-option reactivate' id='opt-react' onclick=\"flashOption('opt-react','flash-green', function(){ reactivateCard(" + cardId + "); })\">Remettre dans le deck actif</button>" +
       "<button class='modal-option danger' id='opt-del' onclick=\"flashOption('opt-del','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">Supprimer la carte</button>" +
       "</div></div>";
@@ -532,10 +550,10 @@ function showAnswerOptions() {
       "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
       "<button class='modal-close' onclick='closeModal()'>×</button>" +
       "<h3>Options pour cette carte</h3>" +
-      "<p class='modal-desc'>Mettre de côté : disparaît 1 mois puis revient.<br>Priorité maximale : apparaît 3× plus souvent 7 jours.<br>Archiver : place la carte dans les cartes maîtrisées.</p>" +
+      "<p class='modal-desc'>Mettre de côté : disparaît 1 mois puis revient.<br>Priorité maximale : apparaît 3× plus souvent 7 jours.<br>Archiver : place la carte dans les cartes archivées.</p>" +
       "<button class='modal-option sideline' id='opt-sideline' onclick=\"flashOption('opt-sideline','flash-blue', function(){ sidelineCard(" + cardId + "); })\">Mettre de côté 1 mois 💤</button>" +
       "<button class='modal-option priority' id='opt-priority' onclick=\"flashOption('opt-priority','flash-orange', function(){ prioritizeCard(" + cardId + "); })\">Priorité maximale 7 jours 🔥</button>" +
-      "<button class='modal-option archive' id='opt-archive' onclick=\"flashOption('opt-archive','flash-gold', function(){ archiveCard(" + cardId + "); })\">Archiver dans les « Maîtrisées » ⭐</button>" +
+      "<button class='modal-option archive' id='opt-archive' onclick=\"flashOption('opt-archive','flash-gold', function(){ archiveCard(" + cardId + "); })\">Archiver dans les « Archivées »</button>" +
       "<button class='modal-option danger' id='opt-delete' onclick=\"flashOption('opt-delete','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">Supprimer la carte du deck</button>" +
       "</div></div>";
   }

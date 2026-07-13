@@ -111,7 +111,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.06</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.08</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" onchange="importCards(event)" />
 
 <script>
@@ -211,8 +211,10 @@ function render() {
 
   var root = document.getElementById("root");
   document.body.className = (view === "study" && reviewMode) ? "review-mode" : "";
-  var total = sessionRight + sessionWrong;
-  var pct = total ? Math.round(sessionRight / total * 100) : null;
+  var right = reviewMode ? dailyStats.reviewRight : dailyStats.studyRight;
+  var wrong = reviewMode ? dailyStats.reviewWrong : dailyStats.studyWrong;
+  var total = right + wrong;
+  var pct = total ? Math.round(right / total * 100) : null;
   var card = deck[idx];
 
   var html = "";
@@ -228,7 +230,7 @@ function render() {
       html += "<div class='review-banner'><span>Révision des cartes archivées</span><button onclick='exitReview()'>Quitter</button></div>";
     }
     html += "<div class='session-bar'>";
-    html += "<span>Session : " + total + " cartes</span>";
+    html += "<span>Jour : " + total + " cartes</span>";
     html += "<span style='color:" + (pct===null?"#888":(pct>=70?"#009246":"#CE2B37")) + "'>" + (pct===null?"Commence !":pct+"% réussi") + "</span>";
     html += "</div>";
 
@@ -375,7 +377,13 @@ function updateSearch(val) {
 
 function toggleMastered() { masteredOpen = !masteredOpen; render(); }
 
-function setView(v) { searchQuery = ""; view = v; render(); }
+function setView(v) {
+  searchQuery = "";
+  // Quitter le mode révision dès qu'on change de section
+  if (reviewMode) { reviewMode = false; buildDeck(); }
+  view = v;
+  render();
+}
 
 function flipCard() {
   flipped = !flipped;
@@ -433,7 +441,7 @@ function answer(correct) {
   });
   if (correct) sessionRight++; else sessionWrong++;
   save(); buildDeck();
-  var pool = Math.min(deck.length, 5);
+  var candidates = [];
   var candidates = [];
   for (var ci = 0; ci < pool; ci++) if (deck[ci].id !== lastCardId) candidates.push(ci);
   if (candidates.length === 0) {
@@ -609,12 +617,10 @@ function startReviewDelayed() {
 function startReview() {
   reviewMode = true;
   view = "study";
-  sessionRight = 0; sessionWrong = 0;
   buildDeck(); render();
 }
 function exitReview() {
   reviewMode = false;
-  sessionRight = 0; sessionWrong = 0;
   buildDeck(); render();
 }
 

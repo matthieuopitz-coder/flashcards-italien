@@ -124,7 +124,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.14</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V5.03</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" />
 
 <script type="module">
@@ -171,14 +171,19 @@ function stripAccent(s) {
 }
 function renderAccent(s) {
   if (!s) return "";
-  var e = esc(s);
-  var toggle = 0;
-  e = e.replace(/\*/g, function() {
-    toggle = 1 - toggle;
-    return toggle === 1 ? "<u>" : "</u>";
-  });
-  if (toggle === 1) e += "</u>";
-  return e.replace(/\//g, "/<wbr>");
+  // 1) On découpe sur les astérisques AVANT d'échapper, pour ne pas confondre.
+  //    Les segments d'index impair sont ceux à souligner.
+  var parts = String(s).split("*");
+  var out = "";
+  for (var i = 0; i < parts.length; i++) {
+    var seg = esc(parts[i]).replace(/\//g, "/<wbr>");
+    if (i % 2 === 1) {
+      out += "<u>" + seg + "</u>";
+    } else {
+      out += seg;
+    }
+  }
+  return out;
 }
 
 var INITIAL_CARDS = [

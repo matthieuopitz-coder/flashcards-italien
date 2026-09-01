@@ -1,4 +1,4 @@
-const CACHE = "flashcards-v27";
+const CACHE = "flashcards-v28";
 const FILES = [
   "/flashcards-italien/",
   "/flashcards-italien/index.html",
@@ -7,13 +7,11 @@ const FILES = [
   "/flashcards-italien/icon-512.png"
 ];
 
-// Installation : met en cache les fichiers de base et s'active immédiatement
 self.addEventListener("install", e => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
 });
 
-// Activation : supprime les anciens caches et prend le contrôle des pages ouvertes
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -22,14 +20,19 @@ self.addEventListener("activate", e => {
   );
 });
 
-// Stratégie network-first : on cherche d'abord la version en ligne,
-// et on ne se rabat sur le cache que si le réseau échoue (mode hors-ligne).
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  const url = new URL(e.request.url);
+  // Ne jamais mettre en cache les appels Firebase (authentification, base de données)
+  if (url.hostname.indexOf("firebase") !== -1 ||
+      url.hostname.indexOf("googleapis") !== -1 ||
+      url.hostname.indexOf("gstatic") !== -1 ||
+      url.hostname.indexOf("firebaseio") !== -1) {
+    return; // laisse le réseau gérer directement
+  }
   e.respondWith(
     fetch(e.request)
       .then(resp => {
-        // Met à jour le cache avec la version fraîche
         const copy = resp.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
         return resp;

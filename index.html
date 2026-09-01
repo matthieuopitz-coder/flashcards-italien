@@ -110,7 +110,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.11</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.12</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" onchange="importCards(event)" />
 
 <script>
@@ -126,6 +126,25 @@ function esc(s) {
 // Comme esc, mais autorise un retour à la ligne après chaque "/" (séparateur de synonymes)
 function escWrap(s) {
   return esc(s).replace(/\//g, "/<wbr>");
+}
+// Retire les astérisques de marquage d'accent tonique (pour liste/recherche)
+function stripAccent(s) {
+  if (!s) return "";
+  return String(s).replace(/\*/g, "");
+}
+// Affiche le mot avec la syllabe entre astérisques soulignée. Gère aussi le "/" et l'échappement.
+function renderAccent(s) {
+  if (!s) return "";
+  // Échappe d'abord, puis transforme *...* en <u>...</u>, puis gère le "/"
+  var e = esc(s);
+  var toggle = 0;
+  e = e.replace(/\*/g, function() {
+    toggle = 1 - toggle;
+    return toggle === 1 ? "<u>" : "</u>";
+  });
+  // Si nombre impair d'astérisques, ferme la balise
+  if (toggle === 1) e += "</u>";
+  return e.replace(/\//g, "/<wbr>");
 }
 
 // ===== Données initiales =====
@@ -206,6 +225,12 @@ function isCardActive(c) {
   return true;
 }
 
+// Retourne true si la carte sort tout juste d'une mise de côté expirée (pop-up à afficher)
+function isReturningCard(c) {
+  var s = scores[c.id];
+  return !!(s && s.sidelined && Date.now() >= s.sidelined);
+}
+
 function buildDeck() {
   var pool = cards.filter(function(c){ return reviewMode ? c.archived : isCardActive(c); });
   var n = pool.length;
@@ -263,8 +288,12 @@ function render() {
     html += "</div>";
 
     if (card) {
-      var front = escWrap(card.reversed ? card.it : card.fr);
-      var back  = escWrap(card.reversed ? card.fr : card.it);
+      // Le mot italien peut contenir un marquage d'accent tonique (*...*), affiché souligné.
+      // Le français est affiché normalement. On applique renderAccent à l'italien, escWrap au français.
+      var frText = escWrap(card.fr);
+      var itText = renderAccent(card.it);
+      var front = card.reversed ? itText : frText;
+      var back  = card.reversed ? frText : itText;
       var lang  = card.reversed ? "🇮🇹 → 🇫🇷" : "🇫🇷 → 🇮🇹";
       var e = card.emoji;
 
@@ -357,6 +386,31 @@ function render() {
   };
   doRestore();
   requestAnimationFrame(doRestore);
+
+  // Pop-up de retour d'une carte mise de côté (une seule fois par carte)
+  if (view === "study" && !reviewMode && card && isReturningCard(card)) {
+    showReturningPopup(card.id);
+  }
+}
+
+function showReturningPopup(cardId) {
+  var modal = document.getElementById("modal-container");
+  modal.innerHTML =
+    "<div class='modal-overlay'><div class='modal'>" +
+    "<h3>💤 Retour d'une carte</h3>" +
+    "<p style='font-size:15px;color:#444;line-height:1.5;margin-bottom:16px'>Cette carte revient après 1 mois de pause 💤... tu la connais toujours ?</p>" +
+    "<button class='btn-save' style='width:100%' onclick='dismissReturning(" + cardId + ")'>OK</button>" +
+    "</div></div>";
+}
+
+function dismissReturning(cardId) {
+  // Efface le marqueur sidelined pour ne plus réafficher le pop-up
+  var s = scores[cardId];
+  if (s && s.sidelined) {
+    delete s.sidelined;
+    save();
+  }
+  closeModal();
 }
 
 function buildListHtml(archived) {
@@ -365,7 +419,7 @@ function buildListHtml(archived) {
   if (searchQuery) {
     var q = searchQuery.toLowerCase();
     list = list.filter(function(c) {
-      return c.fr.toLowerCase().indexOf(q) !== -1 || c.it.toLowerCase().indexOf(q) !== -1;
+      return c.fr.toLowerCase().indexOf(q) !== -1 || stripAccent(c.it).toLowerCase().indexOf(q) !== -1;
     });
   }
   var html = "";
@@ -382,7 +436,7 @@ function buildListHtml(archived) {
     var badge = archived ? "" : (isSidelined ? " 💤" : (isPriority ? " 🔥" : ""));
 
     html += "<div class='stat-row'>";
-    html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + esc(c.fr) + " → " + esc(c.it) + badge + "</span>";
+    html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + esc(c.fr) + " → " + esc(stripAccent(c.it)) + badge + "</span>";
     html += "<span style='white-space:nowrap'>" + dotsHtml + "</span>";
     html += "<button class='row-plus' onclick='openRowMenu(" + c.id + "," + (archived ? "true" : "false") + ")'>+</button>";
     html += "</div>";

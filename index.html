@@ -84,6 +84,7 @@
     .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: #c4c4c4; padding: 6px 0 8px; background: #f5f5f0; }
     body.review-mode .footer { background: #f3ecdd; }
     .footer .version { color: #bbb; margin-left: 6px; }
+    .sync-status { text-align: center; font-size: 12px; color: #aaa; margin-bottom: 10px; }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
     .modal { background: #fff; border: 1px solid #ccc; border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; position: relative; }
@@ -105,15 +106,53 @@
     .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
     .btn-cancel { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #ddd; background: transparent; color: #888; font-size: 15px; cursor: pointer; }
     .btn-save { flex: 1; padding: 12px 0; border-radius: 12px; border: none; background: #009246; color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; }
+
+    /* Écran de connexion */
+    .login-wrap { max-width: 420px; margin: 0 auto; padding: 3rem 1.5rem; text-align: center; }
+    .login-wrap h1 { font-size: 26px; font-weight: 600; margin-bottom: 8px; }
+    .login-wrap p { font-size: 15px; color: #666; line-height: 1.5; margin-bottom: 24px; }
+    .login-input { width: 100%; padding: 13px 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; margin-bottom: 14px; outline: none; }
+    .login-input:focus { border-color: #009246; }
+    .login-btn { width: 100%; padding: 14px 0; border-radius: 12px; border: none; background: #009246; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .login-btn:disabled { opacity: 0.6; cursor: wait; }
+    .login-msg { margin-top: 16px; font-size: 14px; line-height: 1.5; }
+    .login-msg.ok { color: #009246; }
+    .login-msg.err { color: #CE2B37; }
+    .logout-link { background: none; border: none; color: #aaa; font-size: 13px; cursor: pointer; text-decoration: underline; }
   </style>
 </head>
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.12</span></div>
-<input type="file" id="import-input" accept=".json" style="display:none" onchange="importCards(event)" />
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.13</span></div>
+<input type="file" id="import-input" accept=".json" style="display:none" />
 
-<script>
+<script type="module">
+// ===== Firebase =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import {
+  getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink,
+  onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC-rw_ZqUS2_vq7Hn5GoxDY0liVle9wPBA",
+  authDomain: "flashcards-italien-d4c89.firebaseapp.com",
+  projectId: "flashcards-italien-d4c89",
+  storageBucket: "flashcards-italien-d4c89.firebasestorage.app",
+  messagingSenderId: "1029029907565",
+  appId: "1:1029029907565:web:f5e71a62e52355b4248364"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+
+const APP_URL = window.location.origin + window.location.pathname;
+
 // ===== Utilitaires =====
 function cleanEmoji(val) {
   if (!val || val === "null" || val === "undefined") return null;
@@ -123,31 +162,25 @@ function esc(s) {
   if (!s) return "";
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
-// Comme esc, mais autorise un retour à la ligne après chaque "/" (séparateur de synonymes)
 function escWrap(s) {
   return esc(s).replace(/\//g, "/<wbr>");
 }
-// Retire les astérisques de marquage d'accent tonique (pour liste/recherche)
 function stripAccent(s) {
   if (!s) return "";
   return String(s).replace(/\*/g, "");
 }
-// Affiche le mot avec la syllabe entre astérisques soulignée. Gère aussi le "/" et l'échappement.
 function renderAccent(s) {
   if (!s) return "";
-  // Échappe d'abord, puis transforme *...* en <u>...</u>, puis gère le "/"
   var e = esc(s);
   var toggle = 0;
   e = e.replace(/\*/g, function() {
     toggle = 1 - toggle;
     return toggle === 1 ? "<u>" : "</u>";
   });
-  // Si nombre impair d'astérisques, ferme la balise
   if (toggle === 1) e += "</u>";
   return e.replace(/\//g, "/<wbr>");
 }
 
-// ===== Données initiales =====
 var INITIAL_CARDS = [
   { id: 1, fr: "le chat", it: "il gatto", emoji: "🐱" },
   { id: 2, fr: "le chien", it: "il cane", emoji: "🐶" },
@@ -156,34 +189,19 @@ var INITIAL_CARDS = [
   { id: 5, fr: "la pomme", it: "la mela", emoji: "🍎" }
 ];
 
-// ===== Chargement + normalisation (compatibilité anciens exports) =====
 function normalizeCard(c) {
   var emoji = (c.id >= 1 && c.id <= 5) ? cleanEmoji(c.emoji) : null;
   return {
-    id: c.id,
-    fr: c.fr,
-    it: c.it,
-    emoji: emoji,
-    example: c.example || null,
-    example2: c.example2 || null,
+    id: c.id, fr: c.fr, it: c.it, emoji: emoji,
+    example: c.example || null, example2: c.example2 || null,
     archived: c.archived === true
   };
 }
 
-var raw;
-try {
-  raw = JSON.parse(localStorage.getItem("fc_cards") || "null");
-} catch (err) { raw = null; }
-if (!raw || !Array.isArray(raw)) raw = INITIAL_CARDS;
-
-var cards = raw.map(normalizeCard);
-var scores;
-try {
-  scores = JSON.parse(localStorage.getItem("fc_scores") || "{}");
-} catch (err) { scores = {}; }
-var nextId = Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1;
-
 // ===== État global =====
+var cards = [];
+var scores = {};
+var nextId = 1;
 var deck = [], idx = 0, flipped = false;
 var view = "study";
 var pressTimer = null;
@@ -192,16 +210,16 @@ var lastCardId = null;
 var searchQuery = "";
 var masteredOpen = false;
 var reviewMode = false;
+var currentUser = null;
+var syncState = "";
 
-// ===== Compteurs journaliers (étudier / révision séparés) =====
+// ===== Compteurs journaliers =====
 function todayKey() {
   var d = new Date();
   return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
 }
 var dailyStats = null;
-try {
-  dailyStats = JSON.parse(localStorage.getItem("fc_daily") || "null");
-} catch (err) { dailyStats = null; }
+try { dailyStats = JSON.parse(localStorage.getItem("fc_daily") || "null"); } catch (err) { dailyStats = null; }
 if (!dailyStats || dailyStats.date !== todayKey() ||
     typeof dailyStats.studyRight !== "number" || typeof dailyStats.reviewRight !== "number") {
   dailyStats = { date: todayKey(), studyRight: 0, studyWrong: 0, reviewRight: 0, reviewWrong: 0 };
@@ -209,14 +227,84 @@ if (!dailyStats || dailyStats.date !== todayKey() ||
 }
 function saveDaily() { localStorage.setItem("fc_daily", JSON.stringify(dailyStats)); }
 
-// ===== Sauvegarde =====
-function save() {
-  localStorage.setItem("fc_cards", JSON.stringify(cards));
-  localStorage.setItem("fc_scores", JSON.stringify(scores));
-}
-save();
+// ===== Sauvegarde locale (cache) + cloud =====
+function localKey() { return currentUser ? "fc_cards_" + currentUser.uid : "fc_cards"; }
+function localScoresKey() { return currentUser ? "fc_scores_" + currentUser.uid : "fc_scores"; }
 
-// ===== Construction du deck =====
+function saveLocal() {
+  localStorage.setItem(localKey(), JSON.stringify(cards));
+  localStorage.setItem(localScoresKey(), JSON.stringify(scores));
+}
+
+var saveTimeout = null;
+function save() {
+  saveLocal();
+  // Sauvegarde cloud différée (évite trop d'écritures rapprochées)
+  if (currentUser) {
+    syncState = "Sauvegarde...";
+    updateSyncStatus();
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(saveToCloud, 800);
+  }
+}
+
+async function saveToCloud() {
+  if (!currentUser) return;
+  try {
+    await setDoc(doc(db, "users", currentUser.uid), {
+      cards: cards, scores: scores, updated: Date.now()
+    });
+    syncState = "✓ Sauvegardé";
+    updateSyncStatus();
+    setTimeout(function(){ syncState = ""; updateSyncStatus(); }, 2000);
+  } catch (err) {
+    syncState = "⚠ Erreur de sauvegarde";
+    updateSyncStatus();
+  }
+}
+
+async function loadFromCloud() {
+  if (!currentUser) return;
+  try {
+    var snap = await getDoc(doc(db, "users", currentUser.uid));
+    if (snap.exists()) {
+      var data = snap.data();
+      if (data.cards && Array.isArray(data.cards)) {
+        cards = data.cards.map(normalizeCard);
+        scores = data.scores || {};
+      } else {
+        cards = INITIAL_CARDS.map(normalizeCard); scores = {};
+      }
+    } else {
+      // Nouveau compte : on tente de récupérer un éventuel cache local, sinon cartes de base
+      var localRaw = null;
+      try { localRaw = JSON.parse(localStorage.getItem(localKey()) || "null"); } catch (e) {}
+      if (localRaw && Array.isArray(localRaw) && localRaw.length > 0) {
+        cards = localRaw.map(normalizeCard);
+        try { scores = JSON.parse(localStorage.getItem(localScoresKey()) || "{}"); } catch (e) { scores = {}; }
+      } else {
+        cards = INITIAL_CARDS.map(normalizeCard); scores = {};
+      }
+      await saveToCloud();
+    }
+    nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
+    saveLocal();
+  } catch (err) {
+    // En cas d'erreur réseau, on charge le cache local
+    var lr = null;
+    try { lr = JSON.parse(localStorage.getItem(localKey()) || "null"); } catch (e) {}
+    cards = (lr && Array.isArray(lr)) ? lr.map(normalizeCard) : INITIAL_CARDS.map(normalizeCard);
+    try { scores = JSON.parse(localStorage.getItem(localScoresKey()) || "{}"); } catch (e) { scores = {}; }
+    nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
+  }
+}
+
+function updateSyncStatus() {
+  var el = document.getElementById("sync-status");
+  if (el) el.textContent = syncState;
+}
+
+// ===== Deck =====
 function isCardActive(c) {
   if (c.archived) return false;
   var s = scores[c.id];
@@ -224,13 +312,10 @@ function isCardActive(c) {
   if (s.sidelined && Date.now() < s.sidelined) return false;
   return true;
 }
-
-// Retourne true si la carte sort tout juste d'une mise de côté expirée (pop-up à afficher)
 function isReturningCard(c) {
   var s = scores[c.id];
   return !!(s && s.sidelined && Date.now() >= s.sidelined);
 }
-
 function buildDeck() {
   var pool = cards.filter(function(c){ return reviewMode ? c.archived : isCardActive(c); });
   var n = pool.length;
@@ -253,7 +338,7 @@ function buildDeck() {
   deck = d; idx = 0; flipped = false;
 }
 
-// ===== Rendu =====
+// ===== Rendu principal =====
 function render() {
   var savedScroll = {};
   var al = document.getElementById("active-list");
@@ -288,8 +373,6 @@ function render() {
     html += "</div>";
 
     if (card) {
-      // Le mot italien peut contenir un marquage d'accent tonique (*...*), affiché souligné.
-      // Le français est affiché normalement. On applique renderAccent à l'italien, escWrap au français.
       var frText = escWrap(card.fr);
       var itText = renderAccent(card.it);
       var front = card.reversed ? itText : frText;
@@ -348,6 +431,8 @@ function render() {
     var activeCards = cards.filter(function(c){ return !c.archived; });
     var masteredCards = cards.filter(function(c){ return c.archived; });
 
+    html += "<div id='sync-status' class='sync-status'>" + syncState + "</div>";
+
     html += "<div class='deck-top'>";
     html += "<input class='search-box' id='search-input' placeholder='🔍 Rechercher un mot...' value=\"" + esc(searchQuery) + "\" oninput='updateSearch(this.value)' />";
     html += "</div>";
@@ -374,6 +459,11 @@ function render() {
       html += "<div class='list-scroll' id='mastered-list'>" + buildListHtml(true) + "</div>";
     }
     html += "</div>";
+
+    // Compte + déconnexion
+    if (currentUser) {
+      html += "<p style='text-align:center;font-size:12px;color:#aaa;margin-top:8px'>Connecté : " + esc(currentUser.email) + " · <button class='logout-link' onclick='doLogout()'>Déconnexion</button></p>";
+    }
   }
 
   root.innerHTML = html;
@@ -387,30 +477,9 @@ function render() {
   doRestore();
   requestAnimationFrame(doRestore);
 
-  // Pop-up de retour d'une carte mise de côté (une seule fois par carte)
   if (view === "study" && !reviewMode && card && isReturningCard(card)) {
     showReturningPopup(card.id);
   }
-}
-
-function showReturningPopup(cardId) {
-  var modal = document.getElementById("modal-container");
-  modal.innerHTML =
-    "<div class='modal-overlay'><div class='modal'>" +
-    "<h3>💤 Retour d'une carte</h3>" +
-    "<p style='font-size:15px;color:#444;line-height:1.5;margin-bottom:16px'>Cette carte revient après 1 mois de pause 💤... tu la connais toujours ?</p>" +
-    "<button class='btn-save' style='width:100%' onclick='dismissReturning(" + cardId + ")'>OK</button>" +
-    "</div></div>";
-}
-
-function dismissReturning(cardId) {
-  // Efface le marqueur sidelined pour ne plus réafficher le pop-up
-  var s = scores[cardId];
-  if (s && s.sidelined) {
-    delete s.sidelined;
-    save();
-  }
-  closeModal();
 }
 
 function buildListHtml(archived) {
@@ -454,7 +523,6 @@ function updateSearch(val) {
 }
 
 function toggleMastered() { masteredOpen = !masteredOpen; render(); }
-
 function setView(v) {
   searchQuery = "";
   if (reviewMode) { reviewMode = false; buildDeck(); }
@@ -462,7 +530,6 @@ function setView(v) {
   render();
 }
 
-// ===== Jeu =====
 function flipCard() {
   flipped = !flipped;
   var inner = document.querySelector(".card-inner");
@@ -482,15 +549,11 @@ function flipCard() {
 }
 
 function startBtnPress() {
-  btnPressTimer = setTimeout(function() {
-    btnPressTimer = "long";
-    showAnswerOptions();
-  }, 600);
+  btnPressTimer = setTimeout(function() { btnPressTimer = "long"; showAnswerOptions(); }, 600);
 }
 function cancelBtnPress() {
   if (btnPressTimer !== "long") clearTimeout(btnPressTimer);
 }
-
 function flashBtn(id, correct) {
   if (btnPressTimer === "long") { btnPressTimer = null; return; }
   clearTimeout(btnPressTimer);
@@ -527,20 +590,15 @@ function answer(correct) {
   buildDeck();
   var pool = Math.min(deck.length, 5);
   var candidates = [];
-  for (var ci = 0; ci < pool; ci++) {
-    if (deck[ci].id !== lastCardId) candidates.push(ci);
-  }
+  for (var ci = 0; ci < pool; ci++) if (deck[ci].id !== lastCardId) candidates.push(ci);
   if (candidates.length === 0) {
-    for (var cj = 0; cj < deck.length; cj++) {
-      if (deck[cj].id !== lastCardId) candidates.push(cj);
-    }
+    for (var cj = 0; cj < deck.length; cj++) if (deck[cj].id !== lastCardId) candidates.push(cj);
   }
   idx = candidates.length > 0 ? candidates[Math.floor(Math.random() * candidates.length)] : 0;
   flipped = false;
   render();
 }
 
-// ===== Ajout / suppression / édition =====
 function addCard() {
   var fr = document.getElementById("inp-fr").value.trim();
   var it = document.getElementById("inp-it").value.trim();
@@ -558,9 +616,7 @@ function addCard() {
   msg.textContent = "Carte \"" + fr + "\" ajoutée !";
 }
 
-function startPress(id) {
-  pressTimer = setTimeout(function(){ openEditModal(id); }, 600);
-}
+function startPress(id) { pressTimer = setTimeout(function(){ openEditModal(id); }, 600); }
 function cancelPress() { clearTimeout(pressTimer); }
 
 function openRowMenu(id, archived) {
@@ -577,9 +633,7 @@ function openRowMenu(id, archived) {
   document.getElementById("modal-container").innerHTML =
     "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
     "<button class='modal-close' onclick='closeModal()'>×</button>" +
-    "<h3>Options</h3>" +
-    "<div style='margin-top:8px'>" + opts + "</div>" +
-    "</div></div>";
+    "<h3>Options</h3><div style='margin-top:8px'>" + opts + "</div></div></div>";
 }
 
 function deleteFromMenu(id) {
@@ -623,7 +677,6 @@ function saveEdit(id) {
   save(); buildDeck(); closeModal(); render();
 }
 
-// ===== Options par appui long (boutons réponse) =====
 function showAnswerOptions() {
   var card = deck[idx];
   if (!card) return;
@@ -684,27 +737,28 @@ function deleteCardAndNext(id) {
   save(); buildDeck(); closeModal(); render();
 }
 
-// ===== Révision des cartes archivées =====
-function startReviewDelayed() {
-  var btn = document.getElementById("btn-review");
-  if (btn) {
-    btn.style.transition = "background 0.15s, color 0.15s";
-    btn.style.background = "#C79A3B";
-    btn.style.color = "#fff";
-  }
-  setTimeout(startReview, 350);
+function showReturningPopup(cardId) {
+  document.getElementById("modal-container").innerHTML =
+    "<div class='modal-overlay'><div class='modal'>" +
+    "<h3>💤 Retour d'une carte</h3>" +
+    "<p style='font-size:15px;color:#444;line-height:1.5;margin-bottom:16px'>Cette carte revient après 1 mois de pause 💤... tu la connais toujours ?</p>" +
+    "<button class='btn-save' style='width:100%' onclick='dismissReturning(" + cardId + ")'>OK</button>" +
+    "</div></div>";
 }
-function startReview() {
-  reviewMode = true;
-  view = "study";
-  buildDeck(); render();
-}
-function exitReview() {
-  reviewMode = false;
-  buildDeck(); render();
+function dismissReturning(cardId) {
+  var s = scores[cardId];
+  if (s && s.sidelined) { delete s.sidelined; save(); }
+  closeModal();
 }
 
-// ===== Export / import =====
+function startReviewDelayed() {
+  var btn = document.getElementById("btn-review");
+  if (btn) { btn.style.transition = "background 0.15s, color 0.15s"; btn.style.background = "#C79A3B"; btn.style.color = "#fff"; }
+  setTimeout(startReview, 350);
+}
+function startReview() { reviewMode = true; view = "study"; buildDeck(); render(); }
+function exitReview() { reviewMode = false; buildDeck(); render(); }
+
 function exportCards() {
   var data = { cards: cards, scores: scores };
   var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -714,7 +768,7 @@ function exportCards() {
   URL.revokeObjectURL(url);
 }
 
-function importCards(e) {
+function importCardsFile(e) {
   var file = e.target.files[0];
   if (!file) return;
   var reader = new FileReader();
@@ -724,7 +778,7 @@ function importCards(e) {
       if (data.cards && Array.isArray(data.cards)) {
         cards = data.cards.map(normalizeCard);
         scores = data.scores || {};
-        nextId = Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1;
+        nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
         save(); buildDeck(); render();
         alert(cards.length + " cartes importées avec succès !");
       } else { alert("Fichier invalide."); }
@@ -734,10 +788,125 @@ function importCards(e) {
   e.target.value = "";
 }
 
-// ===== Démarrage =====
+// ===== Authentification =====
+function renderLogin(msg, msgType) {
+  document.body.className = "";
+  var root = document.getElementById("root");
+  root.innerHTML =
+    "<div class='login-wrap'>" +
+    "<h1>🇮🇹 Flashcards Italien</h1>" +
+    "<p>Connecte-toi avec ton adresse email pour retrouver tes cartes sur tous tes appareils.</p>" +
+    "<input class='login-input' id='login-email' type='email' placeholder='ton@email.com' />" +
+    "<button class='login-btn' id='login-btn' onclick='sendLoginLink()'>Recevoir le lien de connexion</button>" +
+    "<div id='login-msg' class='login-msg " + (msgType || "") + "'>" + (msg || "") + "</div>" +
+    "</div>";
+}
+
+async function sendLoginLink() {
+  var emailEl = document.getElementById("login-email");
+  var btn = document.getElementById("login-btn");
+  var msg = document.getElementById("login-msg");
+  var email = emailEl.value.trim();
+  if (!email || email.indexOf("@") === -1) { msg.className = "login-msg err"; msg.textContent = "Entre une adresse email valide."; return; }
+  btn.disabled = true; btn.textContent = "Envoi en cours...";
+  var actionCodeSettings = { url: APP_URL, handleCodeInApp: true };
+  try {
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    window.localStorage.setItem("fc_emailForSignIn", email);
+    msg.className = "login-msg ok";
+    msg.innerHTML = "✓ Un lien de connexion a été envoyé à<br><b>" + esc(email) + "</b><br><br>Ouvre ta boîte mail et clique sur le lien pour te connecter. Tu peux fermer cet onglet.";
+  } catch (err) {
+    msg.className = "login-msg err";
+    msg.textContent = "Erreur : " + (err && err.message ? err.message : "impossible d'envoyer le lien.");
+    btn.disabled = false; btn.textContent = "Recevoir le lien de connexion";
+  }
+}
+
+async function doLogout() {
+  if (!confirm("Se déconnecter ? Tes cartes sont sauvegardées dans le cloud.")) return;
+  try { await signOut(auth); } catch (e) {}
+  window.location.reload();
+}
+
+// ===== Démarrage : gestion de l'état de connexion =====
+async function completeEmailLinkSignIn() {
+  if (isSignInWithEmailLink(auth, window.location.href)) {
+    var email = window.localStorage.getItem("fc_emailForSignIn");
+    if (!email) {
+      // L'utilisateur a ouvert le lien sur un autre appareil : on lui redemande son email
+      email = window.prompt("Confirme ton adresse email pour terminer la connexion :");
+    }
+    if (email) {
+      try {
+        await signInWithEmailLink(auth, email, window.location.href);
+        window.localStorage.removeItem("fc_emailForSignIn");
+        // Nettoie l'URL (retire les paramètres du lien)
+        window.history.replaceState({}, document.title, APP_URL);
+      } catch (err) {
+        renderLogin("Erreur de connexion : le lien est peut-être expiré. Réessaie.", "err");
+        return;
+      }
+    }
+  }
+}
+
+onAuthStateChanged(auth, async function(user) {
+  if (user) {
+    currentUser = user;
+    renderLoadingState();
+    await loadFromCloud();
+    buildDeck();
+    render();
+  } else {
+    currentUser = null;
+    renderLogin();
+  }
+});
+
+function renderLoadingState() {
+  var root = document.getElementById("root");
+  root.innerHTML = "<div class='login-wrap'><h1>🇮🇹 Flashcards Italien</h1><p>Chargement de tes cartes...</p></div>";
+}
+
+// Expose les fonctions au scope global (pour les onclick inline)
+window.setView = setView;
+window.flipCard = flipCard;
+window.startBtnPress = startBtnPress;
+window.cancelBtnPress = cancelBtnPress;
+window.flashBtn = flashBtn;
+window.addCard = addCard;
+window.startPress = startPress;
+window.cancelPress = cancelPress;
+window.openRowMenu = openRowMenu;
+window.deleteFromMenu = deleteFromMenu;
+window.openEditModal = openEditModal;
+window.closeModal = closeModal;
+window.saveEdit = saveEdit;
+window.showAnswerOptions = showAnswerOptions;
+window.flashOption = flashOption;
+window.sidelineCard = sidelineCard;
+window.prioritizeCard = prioritizeCard;
+window.archiveCard = archiveCard;
+window.reactivateCard = reactivateCard;
+window.deleteCardAndNext = deleteCardAndNext;
+window.showReturningPopup = showReturningPopup;
+window.dismissReturning = dismissReturning;
+window.startReviewDelayed = startReviewDelayed;
+window.startReview = startReview;
+window.exitReview = exitReview;
+window.exportCards = exportCards;
+window.updateSearch = updateSearch;
+window.toggleMastered = toggleMastered;
+window.sendLoginLink = sendLoginLink;
+window.doLogout = doLogout;
+
+document.getElementById("import-input").addEventListener("change", importCardsFile);
+
+// Enregistrement du service worker
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
-buildDeck();
-render();
+
+// Lancement : d'abord finaliser une éventuelle connexion par lien, puis laisser onAuthStateChanged gérer l'affichage
+completeEmailLinkSignIn();
 </script>
 </body>
 </html>

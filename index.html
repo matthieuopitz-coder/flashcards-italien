@@ -124,7 +124,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.13</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V3.14</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" />
 
 <script type="module">
@@ -276,13 +276,9 @@ async function loadFromCloud() {
         cards = INITIAL_CARDS.map(normalizeCard); scores = {};
       }
     } else {
-      // Nouveau compte : on tente de récupérer un éventuel cache local, sinon cartes de base
-      var localRaw = null;
-      try { localRaw = JSON.parse(localStorage.getItem(localKey()) || "null"); } catch (e) {}
-      if (localRaw && Array.isArray(localRaw) && localRaw.length > 0) {
-        cards = localRaw.map(normalizeCard);
-        try { scores = JSON.parse(localStorage.getItem(localScoresKey()) || "{}"); } catch (e) { scores = {}; }
-      } else {
+      // Nouveau compte : on tente de récupérer d'anciennes cartes locales à migrer vers le cloud.
+      var migrated = tryMigrateLocalCards();
+      if (!migrated) {
         cards = INITIAL_CARDS.map(normalizeCard); scores = {};
       }
       await saveToCloud();
@@ -290,13 +286,36 @@ async function loadFromCloud() {
     nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
     saveLocal();
   } catch (err) {
-    // En cas d'erreur réseau, on charge le cache local
     var lr = null;
     try { lr = JSON.parse(localStorage.getItem(localKey()) || "null"); } catch (e) {}
     cards = (lr && Array.isArray(lr)) ? lr.map(normalizeCard) : INITIAL_CARDS.map(normalizeCard);
     try { scores = JSON.parse(localStorage.getItem(localScoresKey()) || "{}"); } catch (e) { scores = {}; }
     nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
   }
+}
+
+// Cherche d'anciennes cartes en localStorage (avant Firebase ou cache utilisateur) et les charge.
+// Retourne true si des cartes non-triviales ont été trouvées.
+function tryMigrateLocalCards() {
+  var candidates = [
+    { c: "fc_cards_" + currentUser.uid, s: "fc_scores_" + currentUser.uid },
+    { c: "fc_cards", s: "fc_scores" } // ancienne clé d'avant Firebase
+  ];
+  for (var i = 0; i < candidates.length; i++) {
+    var raw = null;
+    try { raw = JSON.parse(localStorage.getItem(candidates[i].c) || "null"); } catch (e) { raw = null; }
+    if (raw && Array.isArray(raw) && raw.length > 0) {
+      // On considère qu'il y a de vraies cartes si le lot dépasse les 5 cartes de base
+      // OU si une carte a un id > 5 (donc ajoutée par l'utilisateur).
+      var hasUserCards = raw.length > 5 || raw.some(function(c){ return c.id > 5; });
+      if (hasUserCards) {
+        cards = raw.map(normalizeCard);
+        try { scores = JSON.parse(localStorage.getItem(candidates[i].s) || "{}"); } catch (e) { scores = {}; }
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function updateSyncStatus() {

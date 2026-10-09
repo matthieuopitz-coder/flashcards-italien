@@ -129,7 +129,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.01</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.02</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" />
 
 <script type="module">
@@ -836,25 +836,25 @@ async function loginWithGoogle() {
   var btn = document.getElementById("btn-google");
   var msg = document.getElementById("login-msg");
   if (btn) { btn.disabled = true; }
-  // En PWA installée, la popup est souvent bloquée → redirection. Sinon, popup (plus fluide).
+  // On privilégie la POPUP partout : sur mobile/PWA, la redirection perd souvent la
+  // session au retour (stockage cloisonné anti-traçage), ce qui ramène à l'écran de
+  // connexion sans connecter. La popup contourne ce problème. Redirection = secours.
   try {
-    if (isStandalone()) {
-      await signInWithRedirect(auth, googleProvider);
-      // La page va se recharger, la suite est gérée par getRedirectResult au démarrage.
-    } else {
-      await signInWithPopup(auth, googleProvider);
-      // onAuthStateChanged prend le relais automatiquement.
-    }
+    await signInWithPopup(auth, googleProvider);
+    // Succès : onAuthStateChanged prend le relais automatiquement.
   } catch (err) {
+    var code = err && err.code ? err.code : "";
+    // Cas où la popup n'est pas utilisable → on tente la redirection en secours
+    if (code === "auth/popup-blocked" ||
+        code === "auth/operation-not-supported-in-this-environment" ||
+        code === "auth/cancelled-popup-request") {
+      try { await signInWithRedirect(auth, googleProvider); return; } catch (e2) {}
+    }
     if (btn) { btn.disabled = false; }
     if (msg) {
       msg.className = "login-msg err";
-      // Si la popup est bloquée, on bascule sur la redirection
-      if (err && (err.code === "auth/popup-blocked" || err.code === "auth/cancelled-popup-request" || err.code === "auth/operation-not-supported-in-this-environment")) {
-        try { await signInWithRedirect(auth, googleProvider); return; } catch (e2) {}
-      }
-      if (err && err.code === "auth/popup-closed-by-user") {
-        msg.textContent = "Connexion annulée.";
+      if (code === "auth/popup-closed-by-user") {
+        msg.textContent = "Connexion annulée. Réessaie.";
       } else {
         msg.textContent = "Erreur de connexion Google : " + (err && err.message ? err.message : "réessaie.");
       }

@@ -129,7 +129,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.02</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.03</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" />
 
 <script type="module">
@@ -820,10 +820,21 @@ function renderLogin(msg, msgType) {
     "<p>Connecte-toi pour retrouver tes cartes sur tous tes appareils.</p>" +
     "<button class='btn-google' id='btn-google' onclick='loginWithGoogle()'>" + GOOGLE_SVG + "Se connecter avec Google</button>" +
     "<div class='login-sep'><span></span>ou par email<span></span></div>" +
-    "<input class='login-input' id='login-email' type='email' placeholder='ton@email.com' />" +
+    "<input class='login-input' id='login-email' type='email' placeholder='ton@email.com' oninput='checkGmailHint()' />" +
+    "<div id='gmail-hint' style='display:none;font-size:13px;color:#9a7524;background:#f3ecdd;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.4'>💡 Tu as une adresse Gmail ? Utilise plutôt le bouton <b>« Se connecter avec Google »</b> ci-dessus : c'est instantané et sans attente.</div>" +
     "<button class='login-btn' id='login-btn' onclick='sendLoginLink()'>Recevoir le lien de connexion</button>" +
     "<div id='login-msg' class='login-msg " + (msgType || "") + "'>" + (msg || "") + "</div>" +
     "</div>";
+}
+
+// Affiche un rappel si l'utilisateur tape une adresse Gmail dans le champ email
+function checkGmailHint() {
+  var emailEl = document.getElementById("login-email");
+  var hint = document.getElementById("gmail-hint");
+  if (!emailEl || !hint) return;
+  var v = emailEl.value.trim().toLowerCase();
+  var isGoogle = /@(gmail\.com|googlemail\.com)$/.test(v);
+  hint.style.display = isGoogle ? "block" : "none";
 }
 
 // Détecte si on est dans une PWA installée (écran d'accueil)
@@ -868,6 +879,13 @@ async function sendLoginLink() {
   var msg = document.getElementById("login-msg");
   var email = emailEl.value.trim();
   if (!email || email.indexOf("@") === -1) { msg.className = "login-msg err"; msg.textContent = "Entre une adresse email valide."; return; }
+  // Adresse Gmail → on oriente vers le bouton Google (plus rapide et sans quota d'emails)
+  if (/@(gmail\.com|googlemail\.com)$/i.test(email)) {
+    msg.className = "login-msg";
+    msg.style.color = "#9a7524";
+    msg.innerHTML = "Ton adresse est une adresse Google. Utilise plutôt le bouton <b>« Se connecter avec Google »</b> en haut : c'est instantané et tu retrouveras le même compte.";
+    return;
+  }
   btn.disabled = true; btn.textContent = "Envoi en cours...";
   var actionCodeSettings = { url: APP_URL, handleCodeInApp: true };
   try {
@@ -970,6 +988,7 @@ window.updateSearch = updateSearch;
 window.toggleMastered = toggleMastered;
 window.sendLoginLink = sendLoginLink;
 window.loginWithGoogle = loginWithGoogle;
+window.checkGmailHint = checkGmailHint;
 window.doLogout = doLogout;
 
 document.getElementById("import-input").addEventListener("change", importCardsFile);

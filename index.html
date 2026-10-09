@@ -115,6 +115,11 @@
     .login-input:focus { border-color: #009246; }
     .login-btn { width: 100%; padding: 14px 0; border-radius: 12px; border: none; background: #009246; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
     .login-btn:disabled { opacity: 0.6; cursor: wait; }
+    .login-sep { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; color: #bbb; font-size: 13px; }
+    .login-sep span { flex: 1; height: 1px; background: #ddd; }
+    .btn-google { width: 100%; padding: 13px 0; border-radius: 12px; border: 1px solid #ccc; background: #fff; color: #333; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .btn-google:disabled { opacity: 0.6; cursor: wait; }
+    .g-logo { width: 18px; height: 18px; flex-shrink: 0; }
     .login-msg { margin-top: 16px; font-size: 14px; line-height: 1.5; }
     .login-msg.ok { color: #009246; }
     .login-msg.err { color: #CE2B37; }
@@ -124,7 +129,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V5.03</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.01</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" />
 
 <script type="module">
@@ -132,7 +137,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import {
   getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink,
-  onAuthStateChanged, signOut
+  onAuthStateChanged, signOut,
+  GoogleAuthProvider, signInWithRedirect, signInWithPopup, getRedirectResult
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc
@@ -150,6 +156,7 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const auth = getAuth(fbApp);
 const db = getFirestore(fbApp);
+const googleProvider = new GoogleAuthProvider();
 
 const APP_URL = window.location.origin + window.location.pathname;
 
@@ -171,17 +178,12 @@ function stripAccent(s) {
 }
 function renderAccent(s) {
   if (!s) return "";
-  // 1) On découpe sur les astérisques AVANT d'échapper, pour ne pas confondre.
-  //    Les segments d'index impair sont ceux à souligner.
   var parts = String(s).split("*");
   var out = "";
   for (var i = 0; i < parts.length; i++) {
     var seg = esc(parts[i]).replace(/\//g, "/<wbr>");
-    if (i % 2 === 1) {
-      out += "<u>" + seg + "</u>";
-    } else {
-      out += seg;
-    }
+    if (i % 2 === 1) { out += "<u>" + seg + "</u>"; }
+    else { out += seg; }
   }
   return out;
 }
@@ -244,7 +246,6 @@ function saveLocal() {
 var saveTimeout = null;
 function save() {
   saveLocal();
-  // Sauvegarde cloud différée (évite trop d'écritures rapprochées)
   if (currentUser) {
     syncState = "Sauvegarde...";
     updateSyncStatus();
@@ -281,7 +282,6 @@ async function loadFromCloud() {
         cards = INITIAL_CARDS.map(normalizeCard); scores = {};
       }
     } else {
-      // Nouveau compte : on tente de récupérer d'anciennes cartes locales à migrer vers le cloud.
       var migrated = tryMigrateLocalCards();
       if (!migrated) {
         cards = INITIAL_CARDS.map(normalizeCard); scores = {};
@@ -299,19 +299,15 @@ async function loadFromCloud() {
   }
 }
 
-// Cherche d'anciennes cartes en localStorage (avant Firebase ou cache utilisateur) et les charge.
-// Retourne true si des cartes non-triviales ont été trouvées.
 function tryMigrateLocalCards() {
   var candidates = [
     { c: "fc_cards_" + currentUser.uid, s: "fc_scores_" + currentUser.uid },
-    { c: "fc_cards", s: "fc_scores" } // ancienne clé d'avant Firebase
+    { c: "fc_cards", s: "fc_scores" }
   ];
   for (var i = 0; i < candidates.length; i++) {
     var raw = null;
     try { raw = JSON.parse(localStorage.getItem(candidates[i].c) || "null"); } catch (e) { raw = null; }
     if (raw && Array.isArray(raw) && raw.length > 0) {
-      // On considère qu'il y a de vraies cartes si le lot dépasse les 5 cartes de base
-      // OU si une carte a un id > 5 (donc ajoutée par l'utilisateur).
       var hasUserCards = raw.length > 5 || raw.some(function(c){ return c.id > 5; });
       if (hasUserCards) {
         cards = raw.map(normalizeCard);
@@ -484,9 +480,9 @@ function render() {
     }
     html += "</div>";
 
-    // Compte + déconnexion
     if (currentUser) {
-      html += "<p style='text-align:center;font-size:12px;color:#aaa;margin-top:8px'>Connecté : " + esc(currentUser.email) + " · <button class='logout-link' onclick='doLogout()'>Déconnexion</button></p>";
+      var who = currentUser.email || "compte connecté";
+      html += "<p style='text-align:center;font-size:12px;color:#aaa;margin-top:8px'>Connecté : " + esc(who) + " · <button class='logout-link' onclick='doLogout()'>Déconnexion</button></p>";
     }
   }
 
@@ -813,17 +809,57 @@ function importCardsFile(e) {
 }
 
 // ===== Authentification =====
+var GOOGLE_SVG = "<svg class='g-logo' viewBox='0 0 48 48'><path fill='#EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/><path fill='#4285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/><path fill='#FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z'/><path fill='#34A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/></svg>";
+
 function renderLogin(msg, msgType) {
   document.body.className = "";
   var root = document.getElementById("root");
   root.innerHTML =
     "<div class='login-wrap'>" +
     "<h1>🇮🇹 Flashcards Italien</h1>" +
-    "<p>Connecte-toi avec ton adresse email pour retrouver tes cartes sur tous tes appareils.</p>" +
+    "<p>Connecte-toi pour retrouver tes cartes sur tous tes appareils.</p>" +
+    "<button class='btn-google' id='btn-google' onclick='loginWithGoogle()'>" + GOOGLE_SVG + "Se connecter avec Google</button>" +
+    "<div class='login-sep'><span></span>ou par email<span></span></div>" +
     "<input class='login-input' id='login-email' type='email' placeholder='ton@email.com' />" +
     "<button class='login-btn' id='login-btn' onclick='sendLoginLink()'>Recevoir le lien de connexion</button>" +
     "<div id='login-msg' class='login-msg " + (msgType || "") + "'>" + (msg || "") + "</div>" +
     "</div>";
+}
+
+// Détecte si on est dans une PWA installée (écran d'accueil)
+function isStandalone() {
+  return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+         window.navigator.standalone === true;
+}
+
+async function loginWithGoogle() {
+  var btn = document.getElementById("btn-google");
+  var msg = document.getElementById("login-msg");
+  if (btn) { btn.disabled = true; }
+  // En PWA installée, la popup est souvent bloquée → redirection. Sinon, popup (plus fluide).
+  try {
+    if (isStandalone()) {
+      await signInWithRedirect(auth, googleProvider);
+      // La page va se recharger, la suite est gérée par getRedirectResult au démarrage.
+    } else {
+      await signInWithPopup(auth, googleProvider);
+      // onAuthStateChanged prend le relais automatiquement.
+    }
+  } catch (err) {
+    if (btn) { btn.disabled = false; }
+    if (msg) {
+      msg.className = "login-msg err";
+      // Si la popup est bloquée, on bascule sur la redirection
+      if (err && (err.code === "auth/popup-blocked" || err.code === "auth/cancelled-popup-request" || err.code === "auth/operation-not-supported-in-this-environment")) {
+        try { await signInWithRedirect(auth, googleProvider); return; } catch (e2) {}
+      }
+      if (err && err.code === "auth/popup-closed-by-user") {
+        msg.textContent = "Connexion annulée.";
+      } else {
+        msg.textContent = "Erreur de connexion Google : " + (err && err.message ? err.message : "réessaie.");
+      }
+    }
+  }
 }
 
 async function sendLoginLink() {
@@ -841,7 +877,11 @@ async function sendLoginLink() {
     msg.innerHTML = "✓ Un lien de connexion a été envoyé à<br><b>" + esc(email) + "</b><br><br>Ouvre ta boîte mail et clique sur le lien pour te connecter. Tu peux fermer cet onglet.";
   } catch (err) {
     msg.className = "login-msg err";
-    msg.textContent = "Erreur : " + (err && err.message ? err.message : "impossible d'envoyer le lien.");
+    if (err && err.code === "auth/quota-exceeded") {
+      msg.innerHTML = "Trop de demandes d'emails aujourd'hui (limite Firebase). Essaie plutôt le bouton <b>Se connecter avec Google</b> ci-dessus, ou réessaie demain.";
+    } else {
+      msg.textContent = "Erreur : " + (err && err.message ? err.message : "impossible d'envoyer le lien.");
+    }
     btn.disabled = false; btn.textContent = "Recevoir le lien de connexion";
   }
 }
@@ -852,25 +892,32 @@ async function doLogout() {
   window.location.reload();
 }
 
-// ===== Démarrage : gestion de l'état de connexion =====
+// ===== Démarrage : finaliser connexions (lien email + redirection Google) =====
 async function completeEmailLinkSignIn() {
   if (isSignInWithEmailLink(auth, window.location.href)) {
     var email = window.localStorage.getItem("fc_emailForSignIn");
     if (!email) {
-      // L'utilisateur a ouvert le lien sur un autre appareil : on lui redemande son email
       email = window.prompt("Confirme ton adresse email pour terminer la connexion :");
     }
     if (email) {
       try {
         await signInWithEmailLink(auth, email, window.location.href);
         window.localStorage.removeItem("fc_emailForSignIn");
-        // Nettoie l'URL (retire les paramètres du lien)
         window.history.replaceState({}, document.title, APP_URL);
       } catch (err) {
         renderLogin("Erreur de connexion : le lien est peut-être expiré. Réessaie.", "err");
         return;
       }
     }
+  }
+}
+
+async function completeGoogleRedirect() {
+  try {
+    await getRedirectResult(auth);
+    // Si connexion réussie, onAuthStateChanged s'en occupe.
+  } catch (err) {
+    // Erreur silencieuse : l'écran de login s'affichera normalement
   }
 }
 
@@ -922,15 +969,19 @@ window.exportCards = exportCards;
 window.updateSearch = updateSearch;
 window.toggleMastered = toggleMastered;
 window.sendLoginLink = sendLoginLink;
+window.loginWithGoogle = loginWithGoogle;
 window.doLogout = doLogout;
 
 document.getElementById("import-input").addEventListener("change", importCardsFile);
 
-// Enregistrement du service worker
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 
-// Lancement : d'abord finaliser une éventuelle connexion par lien, puis laisser onAuthStateChanged gérer l'affichage
-completeEmailLinkSignIn();
+// Lancement : d'abord finaliser une éventuelle connexion (lien email OU redirection Google),
+// puis onAuthStateChanged gère l'affichage.
+(async function start() {
+  await completeGoogleRedirect();
+  await completeEmailLinkSignIn();
+})();
 </script>
 </body>
 </html>

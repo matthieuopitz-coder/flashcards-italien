@@ -30,7 +30,7 @@
       border-radius: 16px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 12px; padding: 1.2rem;
-      background: #fff; border: 2.5px solid #ddd;
+      background: #fff; border: 2.5px solid #bbb;
     }
     body.review-mode .card-face { border-color: #C79A3B; }
     .card-back { transform: rotateY(180deg); }
@@ -52,10 +52,14 @@
     .btn-right { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
     .btn-right.flash { background: #009246; color: #fff; }
     .btn-hint { text-align: center; font-size: 12px; color: #a0a0a0; margin-top: 2px; }
+    .btn-filter { display: block; margin: 0 auto 16px; padding: 8px 20px; border-radius: 20px; border: 1.5px solid #ccc; background: #fff; color: #555; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .btn-filter.active { border-color: #009246; color: #009246; background: #eef7f1; }
+    .btn-audio { background: none; border: none; cursor: pointer; font-size: 30px; line-height: 1; padding: 2px 6px; }
+    .btn-audio:active { transform: scale(0.9); }
 
-    .form-card { background: #fff; border: 1px solid #ccc; border-radius: 16px; padding: 1.5rem; margin-bottom: 16px; }
+    .form-card { background: #fff; border: 1px solid #999; border-radius: 16px; padding: 1.5rem; margin-bottom: 16px; }
     .form-label { font-size: 16px; color: #444; font-weight: 600; display: block; margin-bottom: 4px; }
-    .form-input { width: 100%; padding: 11px 13px; border: 0.5px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 14px; outline: none; background: #f7f7f4; }
+    .form-input { width: 100%; padding: 11px 13px; border: 1px solid #bbb; border-radius: 8px; font-size: 16px; margin-bottom: 14px; outline: none; background: #f7f7f4; }
     .form-input:focus { border-color: #009246; background: #fff; }
     .btn-add { width: 100%; padding: 14px 0; border-radius: 12px; border: none; background: #009246; color: #fff; font-size: 17px; font-weight: 500; cursor: pointer; }
     .add-msg { margin-top: 12px; text-align: center; font-size: 15px; }
@@ -63,7 +67,7 @@
     .add-msg.err { color: #CE2B37; }
 
     .deck-top { display: flex; gap: 10px; margin-bottom: 16px; }
-    .search-box { flex: 1; padding: 8px 13px; border: 0.5px solid #ddd; border-radius: 12px; font-size: 15px; outline: none; background: #fff; }
+    .search-box { flex: 1; padding: 8px 13px; border: 1px solid #bbb; border-radius: 12px; font-size: 15px; outline: none; background: #fff; }
     .search-box:focus { border-color: #009246; }
     .export-btns { display: flex; gap: 10px; margin-bottom: 16px; }
     .btn-export { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 15px; font-weight: 500; cursor: pointer; }
@@ -129,7 +133,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.03</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.07</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" />
 
 <script type="module">
@@ -201,7 +205,8 @@ function normalizeCard(c) {
   return {
     id: c.id, fr: c.fr, it: c.it, emoji: emoji,
     example: c.example || null, example2: c.example2 || null,
-    archived: c.archived === true
+    archived: c.archived === true,
+    createdAt: (typeof c.createdAt === "number") ? c.createdAt : null
   };
 }
 
@@ -217,6 +222,7 @@ var lastCardId = null;
 var searchQuery = "";
 var masteredOpen = false;
 var reviewMode = false;
+var studyFilter = "all"; // all | today | 7d | 30d | hard (filtre des cartes en jeu)
 var currentUser = null;
 var syncState = "";
 
@@ -336,18 +342,59 @@ function isReturningCard(c) {
   var s = scores[c.id];
   return !!(s && s.sidelined && Date.now() >= s.sidelined);
 }
+// Début de journée calendaire il y a "daysBack" jours (en millisecondes)
+function startOfDayOffset(daysBack) {
+  var d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - daysBack);
+  return d.getTime();
+}
+// Carte difficile : au moins 2 ratés sur les 5 dernières réponses
+function isHardCard(c) {
+  var s = scores[c.id];
+  if (!s || !s.history) return false;
+  var hist = s.history.slice(-5);
+  var reds = 0;
+  for (var i = 0; i < hist.length; i++) if (!hist[i]) reds++;
+  return reds >= 2;
+}
+function matchesFilter(c, f) {
+  if (f === "hard") return isHardCard(c);
+  if (f === "today") return !!c.createdAt && c.createdAt >= startOfDayOffset(0);
+  if (f === "7d") return !!c.createdAt && c.createdAt >= startOfDayOffset(6);
+  if (f === "30d") return !!c.createdAt && c.createdAt >= startOfDayOffset(29);
+  return true;
+}
+function filterLabel(f) {
+  if (f === "today") return "cartes du jour";
+  if (f === "7d") return "7 derniers jours";
+  if (f === "30d") return "30 derniers jours";
+  if (f === "hard") return "cartes difficiles";
+  return "toutes les cartes";
+}
+
 function buildDeck() {
   var pool = cards.filter(function(c){ return reviewMode ? c.archived : isCardActive(c); });
+  // Filtre ciblé : uniquement en mode normal (pas en révision des archivées)
+  var filterActive = (!reviewMode && studyFilter !== "all");
+  if (filterActive) {
+    pool = pool.filter(function(c){ return matchesFilter(c, studyFilter); });
+  }
   var n = pool.length;
   var d = [];
   pool.forEach(function(c, i) {
-    var s = scores[c.id] || { right: 0, wrong: 0 };
-    var w = Math.max(1, 1 + (s.wrong || 0) * 2 - (s.right || 0));
-    if (!reviewMode && s.priority && Date.now() < s.priority) w *= 3;
-    if (!reviewMode) {
-      var rank = n - i;
-      if (rank <= 10) w *= 3;
-      else if (rank <= 30) w *= 2;
+    var w;
+    if (filterActive) {
+      w = 1; // passage égal quand un filtre est actif
+    } else {
+      var s = scores[c.id] || { right: 0, wrong: 0 };
+      w = Math.max(1, 1 + (s.wrong || 0) * 2 - (s.right || 0));
+      if (!reviewMode && s.priority && Date.now() < s.priority) w *= 3;
+      if (!reviewMode) {
+        var rank = n - i;
+        if (rank <= 10) w *= 3;
+        else if (rank <= 30) w *= 2;
+      }
     }
     for (var j = 0; j < w; j++) d.push(Object.assign({}, c, { reversed: Math.random() < 0.2 }));
   });
@@ -392,6 +439,12 @@ function render() {
     html += "<span style='color:" + (pct===null?"#888":(pct>=70?"#009246":"#CE2B37")) + "'>" + (pct===null?"Commence !":pct+"% réussi") + "</span>";
     html += "</div>";
 
+    if (!reviewMode) {
+      var fActive = studyFilter !== "all";
+      html += "<button class='btn-filter" + (fActive ? " active" : "") + "' onclick='openFilterMenu()'>" +
+              (fActive ? ("Filtre : " + filterLabel(studyFilter)) : "🔎 Filtrer") + "</button>";
+    }
+
     if (card) {
       var frText = escWrap(card.fr);
       var itText = renderAccent(card.it);
@@ -399,18 +452,21 @@ function render() {
       var back  = card.reversed ? frText : itText;
       var lang  = card.reversed ? "🇮🇹 → 🇫🇷" : "🇫🇷 → 🇮🇹";
       var e = card.emoji;
+      var audioBtn = "<button class='btn-audio' onclick=\"event.stopPropagation(); speakWord(" + card.id + ")\" aria-label='Écouter la prononciation'>🔊</button>";
 
       html += "<div class='card-wrap' onclick='flipCard()'>";
       html += "<div class='card-inner " + (flipped?"flipped":"") + "'>";
       html += "<div class='card-face card-front'>";
       if (e) html += "<div class='card-emoji'>" + e + "</div>";
       html += "<div class='card-word'>" + front + "</div>";
+      if (card.reversed) html += audioBtn;
       html += "<div class='card-lang'>" + lang + "</div>";
       html += "<div class='card-hint'>Cliquer pour retourner</div>";
       html += "</div>";
       html += "<div class='card-face card-back'>";
       if (e) html += "<div class='card-emoji'>" + e + "</div>";
       html += "<div class='card-word'>" + back + "</div>";
+      if (!card.reversed) html += audioBtn;
       html += "<div class='card-sub'>" + front + "</div>";
       if (card.example) html += "<div class='card-example first'>« " + esc(card.example) + " »</div>";
       if (card.example2) html += "<div class='card-example second'>« " + esc(card.example2) + " »</div>";
@@ -426,6 +482,8 @@ function render() {
     } else {
       if (reviewMode) {
         html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte archivée à réviser.<br><button onclick='exitReview()' style='margin-top:12px;padding:10px 18px;border-radius:12px;border:1.5px solid #009246;background:transparent;color:#009246;font-size:15px;cursor:pointer'>Retour au jeu normal</button></p>";
+      } else if (studyFilter !== "all") {
+        html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte pour ce filtre (" + filterLabel(studyFilter) + ").<br><button onclick=\"setFilter('all')\" style='margin-top:12px;padding:10px 18px;border-radius:12px;border:1.5px solid #009246;background:transparent;color:#009246;font-size:15px;cursor:pointer'>Voir toutes les cartes</button></p>";
       } else {
         html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte disponible.</p>";
       }
@@ -580,11 +638,13 @@ function flashBtn(id, correct) {
   btnPressTimer = null;
   var btn = document.getElementById(id);
   var cardInner = document.querySelector(".card-inner");
+  var col = correct ? "#009246" : "#CE2B37";
   if (btn) btn.classList.add("flash");
   if (cardInner) {
-    cardInner.style.outline = correct ? "3px solid #009246" : "3px solid #CE2B37";
-    cardInner.style.boxShadow = correct ? "0 0 0 5px rgba(0,146,70,0.25)" : "0 0 0 5px rgba(206,43,55,0.25)";
+    cardInner.style.boxShadow = correct ? "0 0 0 5px rgba(0,146,70,0.30)" : "0 0 0 5px rgba(206,43,55,0.30)";
     cardInner.style.borderRadius = "16px";
+    var faces = cardInner.querySelectorAll(".card-face");
+    for (var i = 0; i < faces.length; i++) faces[i].style.borderColor = col;
   }
   setTimeout(function() { answer(correct); }, 350);
 }
@@ -626,7 +686,7 @@ function addCard() {
   var ex2 = document.getElementById("inp-ex2").value.trim();
   var msg = document.getElementById("add-msg");
   if (!fr || !it) { msg.className = "add-msg err"; msg.textContent = "Remplis au moins le mot et sa traduction."; return; }
-  cards.push({ id: nextId++, fr: fr, it: it, example: ex || null, example2: ex2 || null, emoji: null, archived: false });
+  cards.push({ id: nextId++, fr: fr, it: it, example: ex || null, example2: ex2 || null, emoji: null, archived: false, createdAt: Date.now() });
   save(); buildDeck();
   document.getElementById("inp-fr").value = "";
   document.getElementById("inp-it").value = "";
@@ -837,6 +897,55 @@ function checkGmailHint() {
   hint.style.display = isGoogle ? "block" : "none";
 }
 
+// ===== Filtre des cartes à réviser =====
+function openFilterMenu() {
+  var mk = function(f, label) {
+    var active = (studyFilter === f);
+    return "<button class='modal-option" + (active ? " flash-green" : "") + "' onclick=\"setFilter('" + f + "')\">" + label + (active ? " ✓" : "") + "</button>";
+  };
+  document.getElementById("modal-container").innerHTML =
+    "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
+    "<button class='modal-close' onclick='closeModal()'>×</button>" +
+    "<h3>Filtrer les cartes à réviser</h3>" +
+    "<p class='modal-desc'>Choisis un sous-ensemble de tes cartes en jeu. Le filtre reste actif jusqu'à ce que tu le changes (ou que tu rouvres l'appli).</p>" +
+    mk("all", "Toutes les cartes") +
+    mk("today", "Cartes du jour") +
+    mk("7d", "7 derniers jours") +
+    mk("30d", "30 derniers jours") +
+    mk("hard", "Cartes difficiles") +
+    "</div></div>";
+}
+function setFilter(f) {
+  studyFilter = f;
+  closeModal();
+  buildDeck();
+  render();
+}
+
+// ===== Prononciation audio (voix italienne du navigateur) =====
+function speakWord(id) {
+  if (!("speechSynthesis" in window)) return;
+  var c = cards.find(function(x){ return x.id === id; });
+  if (!c) return;
+  var text = String(c.it || "")
+    .replace(/\*/g, "")
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2190}-\u{21FF}\u{FE00}-\u{FE0F}\u{200D}]/gu, "")
+    .replace(/\s*\/\s*/g, ", ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return;
+  try {
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "it-IT";
+    var voices = window.speechSynthesis.getVoices() || [];
+    for (var i = 0; i < voices.length; i++) {
+      if (voices[i].lang && voices[i].lang.toLowerCase().indexOf("it") === 0) { u.voice = voices[i]; break; }
+    }
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
 // Détecte si on est dans une PWA installée (écran d'accueil)
 function isStandalone() {
   return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
@@ -989,7 +1098,15 @@ window.toggleMastered = toggleMastered;
 window.sendLoginLink = sendLoginLink;
 window.loginWithGoogle = loginWithGoogle;
 window.checkGmailHint = checkGmailHint;
+window.openFilterMenu = openFilterMenu;
+window.setFilter = setFilter;
+window.speakWord = speakWord;
 window.doLogout = doLogout;
+
+// Pré-charge les voix de synthèse vocale (certains navigateurs les chargent en différé)
+if ("speechSynthesis" in window) {
+  try { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = function(){}; } catch (e) {}
+}
 
 document.getElementById("import-input").addEventListener("change", importCardsFile);
 

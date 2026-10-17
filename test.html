@@ -133,7 +133,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.06</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.07</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" />
 
 <script type="module">
@@ -638,11 +638,13 @@ function flashBtn(id, correct) {
   btnPressTimer = null;
   var btn = document.getElementById(id);
   var cardInner = document.querySelector(".card-inner");
+  var col = correct ? "#009246" : "#CE2B37";
   if (btn) btn.classList.add("flash");
   if (cardInner) {
-    cardInner.style.outline = correct ? "3px solid #009246" : "3px solid #CE2B37";
-    cardInner.style.boxShadow = correct ? "0 0 0 5px rgba(0,146,70,0.25)" : "0 0 0 5px rgba(206,43,55,0.25)";
+    cardInner.style.boxShadow = correct ? "0 0 0 5px rgba(0,146,70,0.30)" : "0 0 0 5px rgba(206,43,55,0.30)";
     cardInner.style.borderRadius = "16px";
+    var faces = cardInner.querySelectorAll(".card-face");
+    for (var i = 0; i < faces.length; i++) faces[i].style.borderColor = col;
   }
   setTimeout(function() { answer(correct); }, 350);
 }

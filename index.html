@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-title" content="Flashcards IT" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f5f5f0; min-height: 100vh; touch-action: manipulation; }
+    body { font-family: system-ui, sans-serif; background: #EBE8E0; min-height: 100vh; touch-action: manipulation; }
     body.review-mode { background: #f3ecdd; }
     #root { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem 3rem 1rem; }
     h2 { text-align: center; font-size: 22px; font-weight: 500; margin-bottom: 20px; }
@@ -47,9 +47,9 @@
     .review-banner button { background: none; border: none; color: #7a5c1a; font-size: 16px; cursor: pointer; text-decoration: underline; }
 
     .answer-btns { display: flex; gap: 12px; margin-bottom: 6px; }
-    .btn-wrong { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #CE2B37; background: transparent; color: #CE2B37; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
+    .btn-wrong { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #CE2B37; background: #fff; color: #CE2B37; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
     .btn-wrong.flash { background: #CE2B37; color: #fff; }
-    .btn-right { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
+    .btn-right { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #009246; background: #fff; color: #009246; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
     .btn-right.flash { background: #009246; color: #fff; }
     .btn-hint { text-align: center; font-size: 12px; color: #a0a0a0; margin-top: 2px; }
     .btn-filter { display: block; margin: 0 auto 16px; padding: 8px 20px; border-radius: 20px; border: 1.5px solid #ccc; background: #fff; color: #555; font-size: 14px; font-weight: 500; cursor: pointer; }
@@ -86,7 +86,7 @@
     .mastered-block { background: #f3ecdd; border-color: #b09660; }
     .btn-review-mastered { width: 100%; padding: 11px 0; border-radius: 12px; border: 1.5px solid #C79A3B; background: transparent; color: #9a7524; font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 12px; }
     .row-plus { background: #f0f0eb; border: 1px solid #bbb; border-radius: 7px; cursor: pointer; font-size: 19px; width: 27px; height: 27px; padding: 0; color: #666; line-height: 1; display: flex; align-items: center; justify-content: center; }
-    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: #c4c4c4; padding: 6px 0 8px; background: #f5f5f0; }
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: #b7b4ab; padding: 6px 0 8px; background: #EBE8E0; }
     body.review-mode .footer { background: #f3ecdd; }
     .footer .version { color: #bbb; margin-left: 6px; }
     .sync-status { text-align: center; font-size: 12px; color: #aaa; margin-bottom: 10px; }
@@ -134,7 +134,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.10</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.11</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" />
 
 <script type="module">

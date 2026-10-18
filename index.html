@@ -54,7 +54,7 @@
     .btn-hint { text-align: center; font-size: 12px; color: #a0a0a0; margin-top: 2px; }
     .btn-filter { display: block; margin: 0 auto 16px; padding: 8px 20px; border-radius: 20px; border: 1.5px solid #ccc; background: #fff; color: #555; font-size: 14px; font-weight: 500; cursor: pointer; }
     .btn-filter.active { border-color: #009246; color: #009246; background: #eef7f1; }
-    .btn-audio { background: none; border: none; cursor: pointer; font-size: 30px; line-height: 1; padding: 2px 6px; }
+    .btn-audio { background: none; border: none; cursor: pointer; font-size: 27px; line-height: 1; padding: 2px 6px; }
     .btn-audio:active { transform: scale(0.9); }
 
     .form-card { background: #fff; border: 1px solid #999; border-radius: 16px; padding: 1.5rem; margin-bottom: 16px; }
@@ -133,7 +133,7 @@
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.07</span></div>
+<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.08</span></div>
 <input type="file" id="import-input" accept=".json" style="display:none" />
 
 <script type="module">
@@ -946,6 +946,35 @@ function speakWord(id) {
   } catch (e) {}
 }
 
+// ===== Pop-up "Nouveautés" (affiché une seule fois, aux utilisateurs déjà actifs) =====
+var whatsNewShown = false;
+function maybeShowWhatsNew() {
+  if (whatsNewShown) return;
+  var seen = false;
+  try { seen = localStorage.getItem("fc_whatsnew_v6") === "1"; } catch (e) {}
+  if (seen) return;
+  if (cards.length === 5) return; // deck par défaut = nouvel utilisateur : pas d'annonce
+  whatsNewShown = true;
+  showWhatsNew();
+}
+function showWhatsNew() {
+  document.getElementById("modal-container").innerHTML =
+    "<div class='modal-overlay'><div class='modal'>" +
+    "<h3>✨ Nouveautés</h3>" +
+    "<div style='font-size:15px;color:#333;line-height:1.55'>" +
+    "<p style='margin-bottom:12px'>L'appli s'est enrichie de deux fonctionnalités :</p>" +
+    "<p style='margin-bottom:12px'><b>🔎 Filtrer</b> — un bouton sous ton score (onglet Étudier) te permet de réviser seulement certaines cartes : celles du jour, des 7 ou 30 derniers jours, ou les cartes difficiles.</p>" +
+    "<p style='margin-bottom:12px'><b>🔊 Audio</b> — au dos de chaque carte, un bouton haut-parleur prononce le mot italien à voix haute.</p>" +
+    "<p style='background:#f3ecdd;color:#7a5c1a;border-radius:10px;padding:10px 12px;margin-top:4px'>⚠️ Les filtres par date (jour / 7 j / 30 j) ne concernent que les cartes ajoutées à partir de maintenant : les cartes plus anciennes n'ont pas de date d'ajout enregistrée.</p>" +
+    "</div>" +
+    "<button class='btn-save' style='width:100%;margin-top:16px' onclick='dismissWhatsNew()'>J'ai compris</button>" +
+    "</div></div>";
+}
+function dismissWhatsNew() {
+  try { localStorage.setItem("fc_whatsnew_v6", "1"); } catch (e) {}
+  closeModal();
+}
+
 // Détecte si on est dans une PWA installée (écran d'accueil)
 function isStandalone() {
   return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
@@ -1055,6 +1084,7 @@ onAuthStateChanged(auth, async function(user) {
     await loadFromCloud();
     buildDeck();
     render();
+    maybeShowWhatsNew();
   } else {
     currentUser = null;
     renderLogin();
@@ -1101,6 +1131,7 @@ window.checkGmailHint = checkGmailHint;
 window.openFilterMenu = openFilterMenu;
 window.setFilter = setFilter;
 window.speakWord = speakWord;
+window.dismissWhatsNew = dismissWhatsNew;
 window.doLogout = doLogout;
 
 // Pré-charge les voix de synthèse vocale (certains navigateurs les chargent en différé)

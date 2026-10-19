@@ -512,14 +512,9 @@ async function loadFromCloud() {
       saveLocal();
       return { needsPicker:false };
     } else {
-      // Pas de document : migration d'anciennes cartes locales (toujours FR→IT), sinon choix.
-      var migrated = tryMigrateLocalCards();
-      if (migrated) {
-        MODE = { known: "fr", learn: "it" };
-        nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
-        await saveToCloud();
-        return { needsPicker:false };
-      }
+      // Nouveau compte (aucun document cloud) → écran de choix de la langue.
+      // (Plus de migration automatique depuis le cache local : elle faisait hériter
+      //  les cartes d'un autre compte présent sur l'appareil et sautait l'écran de choix.)
       return { needsPicker:true };
     }
   } catch (err) {
@@ -532,26 +527,6 @@ async function loadFromCloud() {
     nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
     return { needsPicker:false };
   }
-}
-
-function tryMigrateLocalCards() {
-  var candidates = [
-    { c: "fc_cards_" + currentUser.uid, s: "fc_scores_" + currentUser.uid },
-    { c: "fc_cards", s: "fc_scores" }
-  ];
-  for (var i = 0; i < candidates.length; i++) {
-    var raw = null;
-    try { raw = JSON.parse(localStorage.getItem(candidates[i].c) || "null"); } catch (e) { raw = null; }
-    if (raw && Array.isArray(raw) && raw.length > 0) {
-      var hasUserCards = raw.length > 5 || raw.some(function(c){ return c.id > 5; });
-      if (hasUserCards) {
-        cards = raw.map(normalizeCard);
-        try { scores = JSON.parse(localStorage.getItem(candidates[i].s) || "{}"); } catch (e) { scores = {}; }
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 function updateSyncStatus() {

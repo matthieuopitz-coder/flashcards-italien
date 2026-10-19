@@ -207,7 +207,7 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 
 const APP_URL = window.location.origin + window.location.pathname;
-const VERSION = "V7.00";
+const VERSION = "V7.05";
 
 // Mode aperçu (test) : ?preview=itfr (italien), ?preview=frit (français), ?preview=pick (écran de choix)
 // En aperçu, AUCUNE sauvegarde n'est faite : les données du compte ne sont jamais modifiées.
@@ -676,7 +676,7 @@ function render() {
     }
     html += "<div class='session-bar'>";
     html += "<span>" + t("day_count", total) + "</span>";
-    html += "<span style='color:" + (pct===null?"#888":(pct>=70?"var(--success)":"var(--danger)")) + "'>" + (pct===null?t("start_prompt"):t("pct_success", pct)) + "</span>";
+    html += "<span style='color:#fff;font-weight:600'>" + (pct===null?t("start_prompt"):t("pct_success", pct)) + "</span>";
     html += "</div>";
 
     if (!reviewMode) {
@@ -883,10 +883,13 @@ function flashBtn(id, correct) {
   var rgb = correct ? THEME.successRgb : THEME.dangerRgb;
   if (btn) btn.classList.add("flash");
   if (cardInner) {
-    cardInner.style.boxShadow = "0 0 0 5px rgba(" + rgb + ",0.30)";
-    cardInner.style.borderRadius = "16px";
+    // Surbrillance : dégradé coloré vers l'intérieur de la carte (lisible sur fond coloré)
     var faces = cardInner.querySelectorAll(".card-face");
-    for (var i = 0; i < faces.length; i++) faces[i].style.borderColor = col;
+    for (var i = 0; i < faces.length; i++) {
+      faces[i].style.borderColor = col;
+      faces[i].style.borderWidth = "3px";
+      faces[i].style.boxShadow = "inset 0 0 26px 3px rgba(" + rgb + ",0.55)";
+    }
   }
   setTimeout(function() { answer(correct); }, 350);
 }

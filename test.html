@@ -170,6 +170,8 @@ const fbApp = initializeApp(firebaseConfig);
 const auth = getAuth(fbApp);
 const db = getFirestore(fbApp);
 const googleProvider = new GoogleAuthProvider();
+// Toujours afficher le sélecteur de compte Google → permet de changer de compte
+googleProvider.setCustomParameters({ prompt: "select_account" });
 
 const APP_URL = window.location.origin + window.location.pathname;
 const VERSION = "V7.00";

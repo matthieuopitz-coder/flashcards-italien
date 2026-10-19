@@ -137,6 +137,18 @@
     .pick-btn { display: flex; align-items: center; gap: 12px; width: 100%; border: 1.5px solid #dce4ee; border-radius: 14px; padding: 16px; margin-bottom: 14px; font-size: 16px; font-weight: 600; color: #163a66; background: #fff; cursor: pointer; text-align: left; }
     .pick-btn .pfl { font-size: 17px; letter-spacing: 1px; }
     .pick-btn:hover { border-color: #0055A4; background: #f2f6fb; }
+
+    /* Charte « marque » (avant le choix de la langue : connexion / choix / chargement) */
+    body.brand { background: linear-gradient(145deg, #e9f4ee 0%, #e7eef7 55%, #e4edf8 100%); }
+    body.brand .footer { background: transparent; }
+    body.brand .brandname {
+      background: linear-gradient(120deg, #0f9b54 0%, #0a5fb8 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+    }
+    body.brand .login-btn { background: linear-gradient(120deg, #17a55a 0%, #0a5fb8 100%); }
+    body.brand .login-input:focus { border-color: #1f7fb8; }
+    body.brand .pick-btn:hover { border-color: #0a5fb8; background: #eef3fb; }
   </style>
 </head>
 <body>
@@ -1086,12 +1098,12 @@ function setFooter() {
 }
 
 function renderLogin(msg, msgType) {
-  document.body.className = "";
+  document.body.className = "brand";
   uiLang = loginLang;
   var root = document.getElementById("root");
   root.innerHTML =
     "<div class='login-wrap'>" +
-    "<h1>Flashcards 🇮🇹🇫🇷</h1>" +
+    "<h1><span class='brandname'>Flashcards</span> 🇮🇹🇫🇷</h1>" +
     "<p>" + t("login_subtitle") + "</p>" +
     "<button class='btn-google' id='btn-google' onclick='loginWithGoogle()'>" + GOOGLE_SVG + t("login_google") + "</button>" +
     "<div class='login-sep'><span></span>" + t("login_or_email") + "<span></span></div>" +
@@ -1104,13 +1116,13 @@ function renderLogin(msg, msgType) {
 }
 
 function renderPicker() {
-  document.body.className = "";
+  document.body.className = "brand";
   uiLang = loginLang;
   var root = document.getElementById("root");
   root.innerHTML =
     "<div class='login-wrap'>" +
-    "<div style='font-size:46px;margin-bottom:6px'>👋</div>" +
-    "<p style='margin-bottom:26px;color:#666;font-size:14px'>" + t("pick_sub") + "</p>" +
+    "<h1><span class='brandname'>Flashcards</span> 🇮🇹🇫🇷</h1>" +
+    "<p style='margin:10px 0 24px;color:#666;font-size:14px'>👋 " + t("pick_sub") + "</p>" +
     "<button class='pick-btn' onclick=\"chooseMode('it','fr')\"><span class='pfl'>🇮🇹→🇫🇷</span> Imparo il francese</button>" +
     "<button class='pick-btn' onclick=\"chooseMode('fr','it')\"><span class='pfl'>🇫🇷→🇮🇹</span> J'apprends l'italien</button>" +
     "</div>";
@@ -1343,9 +1355,10 @@ onAuthStateChanged(auth, async function(user) {
 });
 
 function renderLoadingState() {
+  document.body.className = "brand";
   uiLang = loginLang;
   var root = document.getElementById("root");
-  root.innerHTML = "<div class='login-wrap'><h1>Flashcards 🇮🇹🇫🇷</h1><p>" + t("loading") + "</p></div>";
+  root.innerHTML = "<div class='login-wrap'><h1><span class='brandname'>Flashcards</span> 🇮🇹🇫🇷</h1><p>" + t("loading") + "</p></div>";
   setFooter();
 }
 

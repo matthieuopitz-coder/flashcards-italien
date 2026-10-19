@@ -14,6 +14,7 @@
     :root {
       --primary: #009246; --success: #009246; --danger: #CE2B37;
       --soft: #eef7f1; --bg: #E3EEEA; --footer-text: #a1b3ad;
+      --appbg: linear-gradient(135deg, #17a55a 0%, #17a55a 32%, #0a5fb8 100%);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: var(--bg); min-height: 100vh; touch-action: manipulation; }
@@ -149,6 +150,26 @@
     body.brand .login-btn { background: linear-gradient(120deg, #17a55a 0%, #0a5fb8 100%); }
     body.brand .login-input:focus { border-color: #1f7fb8; }
     body.brand .pick-btn:hover { border-color: #0a5fb8; background: #eef3fb; }
+
+    /* ===== Fond dégradé, piloté par la langue apprise (voir applyTheme) ===== */
+    body { background: var(--appbg); }
+    body.brand { background: var(--appbg); }
+    .footer { background: transparent; color: rgba(255,255,255,.82); }
+    .footer .version { color: rgba(255,255,255,.72); }
+    h2 { color: #fff; }
+    .tab { color: rgba(255,255,255,.85); }
+    .tab.active { background: rgba(255,255,255,.96); color: #17304d; }
+    .session-bar { color: rgba(255,255,255,.92); }
+    .btn-filter { background: rgba(255,255,255,.95); border-color: rgba(255,255,255,.55); color: #17304d; }
+    .btn-filter.active { background: rgba(255,255,255,.96); border-color: #fff; color: #17304d; }
+    .btn-export, .btn-import { background: rgba(255,255,255,.92); }
+    .sync-status { color: rgba(255,255,255,.9); }
+    .btn-hint { color: rgba(255,255,255,.78); }
+    body.brand .brandname { background: none; -webkit-text-fill-color: #fff; color: #fff; }
+    body.brand .login-wrap p { color: rgba(255,255,255,.92); }
+    body.brand .login-sep { color: rgba(255,255,255,.8); }
+    body.brand .login-sep span { background: rgba(255,255,255,.4); }
+    body.brand .login-btn { background: #fff; color: #17304d; }
   </style>
 </head>
 <body>
@@ -186,7 +207,7 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 
 const APP_URL = window.location.origin + window.location.pathname;
-const VERSION = "V7.00";
+const VERSION = "V7.05";
 
 // Mode aperçu (test) : ?preview=itfr (italien), ?preview=frit (français), ?preview=pick (écran de choix)
 // En aperçu, AUCUNE sauvegarde n'est faite : les données du compte ne sont jamais modifiées.
@@ -233,6 +254,10 @@ function applyTheme(){
   r.setProperty("--soft", th.soft);
   r.setProperty("--bg", th.bg);
   r.setProperty("--footer-text", th.footerText);
+  // Fond par langue apprise : italien = plus de vert, français = un peu moins de vert
+  r.setProperty("--appbg", MODE.learn === "it"
+    ? "linear-gradient(135deg, #17a55a 0%, #17a55a 32%, #0a5fb8 100%)"
+    : "linear-gradient(135deg, #17a55a 0%, #0a5fb8 100%)");
   THEME = th;
   document.documentElement.lang = MODE.known;
   var meta = document.querySelector('meta[name="theme-color"]');

@@ -3,22 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Flashcards Italien</title>
+  <title>Flashcards</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#009246" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Flashcards IT" />
+  <meta name="apple-mobile-web-app-title" content="Flashcards" />
   <style>
+    :root {
+      --primary: #009246; --success: #009246; --danger: #CE2B37;
+      --soft: #eef7f1; --bg: #E3EEEA; --footer-text: #a1b3ad;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #E3EEEA; min-height: 100vh; touch-action: manipulation; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); min-height: 100vh; touch-action: manipulation; }
     body.review-mode { background: #f3ecdd; }
     #root { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem 3rem 1rem; }
     h2 { text-align: center; font-size: 22px; font-weight: 500; margin-bottom: 20px; }
     .tabs { display: flex; justify-content: center; gap: 6px; margin-bottom: 24px; }
     .tab { padding: 9px 20px; border-radius: 20px; border: none; cursor: pointer; font-size: 16px; font-weight: 500; background: transparent; color: #555; transition: all 0.2s; }
-    .tab.active { background: #009246; color: #fff; }
+    .tab.active { background: var(--primary); color: #fff; }
     .session-bar { display: flex; justify-content: space-between; font-size: 15px; color: #888; margin-bottom: 12px; }
 
     .card-wrap { perspective: 1000px; cursor: pointer; height: 340px; margin-bottom: 20px; }
@@ -47,13 +51,13 @@
     .review-banner button { background: none; border: none; color: #7a5c1a; font-size: 16px; cursor: pointer; text-decoration: underline; }
 
     .answer-btns { display: flex; gap: 12px; margin-bottom: 6px; }
-    .btn-wrong { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #CE2B37; background: #fff; color: #CE2B37; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
-    .btn-wrong.flash { background: #CE2B37; color: #fff; }
-    .btn-right { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid #009246; background: #fff; color: #009246; font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
-    .btn-right.flash { background: #009246; color: #fff; }
+    .btn-wrong { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid var(--danger); background: #fff; color: var(--danger); font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
+    .btn-wrong.flash { background: var(--danger); color: #fff; }
+    .btn-right { flex: 1; padding: 14px 0; border-radius: 12px; border: 1.5px solid var(--success); background: #fff; color: var(--success); font-size: 19px; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none; -webkit-user-select: none; }
+    .btn-right.flash { background: var(--success); color: #fff; }
     .btn-hint { text-align: center; font-size: 12px; color: #a0a0a0; margin-top: 2px; }
     .btn-filter { display: block; margin: 0 auto 16px; padding: 8px 20px; border-radius: 20px; border: 1.5px solid #ccc; background: #fff; color: #555; font-size: 14px; font-weight: 500; cursor: pointer; }
-    .btn-filter.active { border-color: #009246; color: #009246; background: #eef7f1; }
+    .btn-filter.active { border-color: var(--primary); color: var(--primary); background: var(--soft); }
     .btn-audio { background: none; border: none; cursor: pointer; font-size: 27px; line-height: 1; padding: 2px 6px; }
     .btn-audio-sm { background: none; border: none; cursor: pointer; font-size: 16px; line-height: 1; padding: 0 2px; vertical-align: middle; }
     .btn-audio:active { transform: scale(0.9); }
@@ -61,23 +65,23 @@
     .form-card { background: #fff; border: 1px solid #999; border-radius: 16px; padding: 1.5rem; margin-bottom: 16px; }
     .form-label { font-size: 16px; color: #444; font-weight: 600; display: block; margin-bottom: 4px; }
     .form-input { width: 100%; padding: 11px 13px; border: 1px solid #bbb; border-radius: 8px; font-size: 16px; margin-bottom: 14px; outline: none; background: #f7f7f4; }
-    .form-input:focus { border-color: #009246; background: #fff; }
-    .btn-add { width: 100%; padding: 14px 0; border-radius: 12px; border: none; background: #009246; color: #fff; font-size: 17px; font-weight: 500; cursor: pointer; }
+    .form-input:focus { border-color: var(--primary); background: #fff; }
+    .btn-add { width: 100%; padding: 14px 0; border-radius: 12px; border: none; background: var(--primary); color: #fff; font-size: 17px; font-weight: 500; cursor: pointer; }
     .add-msg { margin-top: 12px; text-align: center; font-size: 15px; }
-    .add-msg.ok { color: #009246; }
-    .add-msg.err { color: #CE2B37; }
+    .add-msg.ok { color: var(--success); }
+    .add-msg.err { color: var(--danger); }
 
     .deck-top { display: flex; gap: 10px; margin-bottom: 16px; }
     .search-box { flex: 1; padding: 8px 13px; border: 1px solid #bbb; border-radius: 12px; font-size: 15px; outline: none; background: #fff; }
-    .search-box:focus { border-color: #009246; }
+    .search-box:focus { border-color: var(--primary); }
     .export-btns { display: flex; gap: 10px; margin-bottom: 16px; }
-    .btn-export { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #009246; background: transparent; color: #009246; font-size: 15px; font-weight: 500; cursor: pointer; }
+    .btn-export { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid var(--primary); background: transparent; color: var(--primary); font-size: 15px; font-weight: 500; cursor: pointer; }
     .btn-import { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #888; background: transparent; color: #888; font-size: 15px; font-weight: 500; cursor: pointer; }
 
     .list-block { background: #fff; border: 1px solid #999; border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 16px; }
     .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .list-title { font-size: 17px; font-weight: 600; }
-    .list-title .count { color: #009246; font-weight: 600; }
+    .list-title .count { color: var(--primary); font-weight: 600; }
     .list-scroll { max-height: 320px; overflow-y: auto; }
     .collapse-btn { background: none; border: none; cursor: pointer; font-size: 14px; color: #888; display: flex; align-items: center; gap: 6px; }
     .stat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 15px; user-select: none; }
@@ -86,7 +90,7 @@
     .mastered-block { background: #f3ecdd; border-color: #b09660; }
     .btn-review-mastered { width: 100%; padding: 11px 0; border-radius: 12px; border: 1.5px solid #C79A3B; background: transparent; color: #9a7524; font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 12px; }
     .row-plus { background: #f0f0eb; border: 1px solid #bbb; border-radius: 7px; cursor: pointer; font-size: 19px; width: 27px; height: 27px; padding: 0; color: #666; line-height: 1; display: flex; align-items: center; justify-content: center; }
-    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: #a1b3ad; padding: 6px 0 8px; background: #E3EEEA; }
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 11px; color: var(--footer-text); padding: 6px 0 8px; background: var(--bg); }
     body.review-mode .footer { background: #f3ecdd; }
     .footer .version { color: #bbb; margin-left: 6px; }
     .sync-status { text-align: center; font-size: 12px; color: #aaa; margin-bottom: 10px; }
@@ -98,27 +102,27 @@
     .modal-desc { font-size: 13px; color: #aaa; margin-bottom: 16px; line-height: 1.4; }
     .modal-option { width: 100%; padding: 13px 16px; border-radius: 12px; border: 1.5px solid #ddd; background: transparent; color: #222; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 10px; text-align: left; transition: background 0.15s, color 0.15s; }
     .modal-option:hover { background: #f5f5f0; }
-    .modal-option.danger { color: #CE2B37; border-color: #CE2B37; }
+    .modal-option.danger { color: var(--danger); border-color: var(--danger); }
     .modal-option.sideline { border-color: #2B7FCE; color: #2B7FCE; }
     .modal-option.priority { border-color: #E08A1E; color: #E08A1E; }
     .modal-option.archive { border-color: #C79A3B; color: #9a7524; }
-    .modal-option.reactivate { border-color: #009246; color: #009246; }
+    .modal-option.reactivate { border-color: var(--success); color: var(--success); }
     .modal-option.flash-blue { background: #2B7FCE; color: #fff; }
     .modal-option.flash-orange { background: #E08A1E; color: #fff; }
     .modal-option.flash-gold { background: #C79A3B; color: #fff; }
-    .modal-option.flash-green { background: #009246; color: #fff; }
-    .modal-option.flash-red { background: #CE2B37; color: #fff; }
+    .modal-option.flash-green { background: var(--success); color: #fff; }
+    .modal-option.flash-red { background: var(--danger); color: #fff; }
     .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
     .btn-cancel { flex: 1; padding: 12px 0; border-radius: 12px; border: 1.5px solid #ddd; background: transparent; color: #888; font-size: 15px; cursor: pointer; }
-    .btn-save { flex: 1; padding: 12px 0; border-radius: 12px; border: none; background: #009246; color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; }
+    .btn-save { flex: 1; padding: 12px 0; border-radius: 12px; border: none; background: var(--primary); color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; }
 
-    /* Écran de connexion */
+    /* Écran de connexion / choix */
     .login-wrap { max-width: 420px; margin: 0 auto; padding: 3rem 1.5rem; text-align: center; }
     .login-wrap h1 { font-size: 26px; font-weight: 600; margin-bottom: 8px; }
     .login-wrap p { font-size: 15px; color: #666; line-height: 1.5; margin-bottom: 24px; }
     .login-input { width: 100%; padding: 13px 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; margin-bottom: 14px; outline: none; }
-    .login-input:focus { border-color: #009246; }
-    .login-btn { width: 100%; padding: 14px 0; border-radius: 12px; border: none; background: #009246; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .login-input:focus { border-color: var(--primary); }
+    .login-btn { width: 100%; padding: 14px 0; border-radius: 12px; border: none; background: var(--primary); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
     .login-btn:disabled { opacity: 0.6; cursor: wait; }
     .login-sep { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; color: #bbb; font-size: 13px; }
     .login-sep span { flex: 1; height: 1px; background: #ddd; }
@@ -126,15 +130,19 @@
     .btn-google:disabled { opacity: 0.6; cursor: wait; }
     .g-logo { width: 18px; height: 18px; flex-shrink: 0; }
     .login-msg { margin-top: 16px; font-size: 14px; line-height: 1.5; }
-    .login-msg.ok { color: #009246; }
-    .login-msg.err { color: #CE2B37; }
+    .login-msg.ok { color: var(--success); }
+    .login-msg.err { color: var(--danger); }
     .logout-link { background: none; border: none; color: #aaa; font-size: 13px; cursor: pointer; text-decoration: underline; }
+
+    .pick-btn { display: flex; align-items: center; gap: 12px; width: 100%; border: 1.5px solid #dce4ee; border-radius: 14px; padding: 16px; margin-bottom: 14px; font-size: 16px; font-weight: 600; color: #163a66; background: #fff; cursor: pointer; text-align: left; }
+    .pick-btn .pfl { font-size: 17px; letter-spacing: 1px; }
+    .pick-btn:hover { border-color: #0055A4; background: #f2f6fb; }
   </style>
 </head>
 <body>
 <div id="root"></div>
 <div id="modal-container"></div>
-<div class="footer">Application développée par Matthieu Opitz<span class="version">V6.14</span></div>
+<div class="footer"></div>
 <input type="file" id="import-input" accept=".json" style="display:none" />
 
 <script type="module">
@@ -162,8 +170,215 @@ const fbApp = initializeApp(firebaseConfig);
 const auth = getAuth(fbApp);
 const db = getFirestore(fbApp);
 const googleProvider = new GoogleAuthProvider();
+// Toujours afficher le sélecteur de compte Google → permet de changer de compte
+googleProvider.setCustomParameters({ prompt: "select_account" });
 
 const APP_URL = window.location.origin + window.location.pathname;
+const VERSION = "V7.00";
+
+// Mode aperçu (test) : ?preview=itfr (italien), ?preview=frit (français), ?preview=pick (écran de choix)
+// En aperçu, AUCUNE sauvegarde n'est faite : les données du compte ne sont jamais modifiées.
+var PREVIEW = null;
+try { PREVIEW = new URLSearchParams(window.location.search).get("preview"); } catch (e) {}
+
+// ===== Langues (moteur multilingue) =====
+// Chaque langue : drapeau, voix de synthèse, nom des langues DANS cette langue,
+// exemples par défaut, et le thème appliqué quand on APPREND cette langue.
+var LANGS = {
+  fr: {
+    flag: "🇫🇷", tts: "fr-FR",
+    nameOf: { fr: "français", it: "italien" },
+    sampleWord: "le vélo", sampleS1: "Je vais à l'école à vélo", sampleS2: "J'aime le vélo rouge",
+    theme: { primary:"#0055A4", success:"#2e9e5b", danger:"#CE2B37", soft:"#eef4fb",
+             bg:"#E7EEF4", footerText:"#9fb2c6", successRgb:"46,158,91", dangerRgb:"206,43,55" }
+  },
+  it: {
+    flag: "🇮🇹", tts: "it-IT",
+    nameOf: { fr: "francese", it: "italiano" },
+    sampleWord: "la bicicletta", sampleS1: "Vado a scuola in bicicletta", sampleS2: "Mi piace la bicicletta rossa",
+    theme: { primary:"#009246", success:"#009246", danger:"#CE2B37", soft:"#eef7f1",
+             bg:"#E3EEEA", footerText:"#a1b3ad", successRgb:"0,146,70", dangerRgb:"206,43,55" }
+  }
+};
+
+// Mode du compte : langue connue (interface + question) → langue apprise (audio + thème + réponse)
+var MODE = { known: "fr", learn: "it" };   // défaut hérité (comptes existants = FR→IT)
+var THEME = LANGS.it.theme;
+
+function flagK(){ return LANGS[MODE.known].flag; }
+function flagL(){ return LANGS[MODE.learn].flag; }
+function learnName(){ return LANGS[MODE.known].nameOf[MODE.learn]; }
+function knownName(){ return LANGS[MODE.known].nameOf[MODE.known]; }
+function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+function appTitle(){ return flagL() + " Flashcards " + cap(learnName()); }
+
+function applyTheme(){
+  var th = LANGS[MODE.learn].theme;
+  var r = document.documentElement.style;
+  r.setProperty("--primary", th.primary);
+  r.setProperty("--success", th.success);
+  r.setProperty("--danger", th.danger);
+  r.setProperty("--soft", th.soft);
+  r.setProperty("--bg", th.bg);
+  r.setProperty("--footer-text", th.footerText);
+  THEME = th;
+  document.documentElement.lang = MODE.known;
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", th.primary);
+  if (PREVIEW) ensurePreviewBanner();
+}
+
+function ensurePreviewBanner() {
+  if (!PREVIEW || document.getElementById("preview-banner")) return;
+  var d = document.createElement("div");
+  d.id = "preview-banner";
+  d.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:200;background:#17304d;color:#fff;font-size:12px;text-align:center;padding:6px 8px;font-weight:600";
+  d.textContent = "👁️ Aperçu — rien n'est sauvegardé · Anteprima — niente viene salvato";
+  document.body.appendChild(d);
+  var root = document.getElementById("root");
+  if (root) root.style.marginTop = "26px";
+}
+
+// ===== Traductions de l'interface =====
+var UI = {
+  fr: {
+    tab_study:"Étudier", tab_add:"Ajouter", tab_cards:"Cartes",
+    review_banner:"Révision des cartes archivées", review_quit:"Quitter",
+    day_count:function(n){ return "Jour : " + n + " cartes"; },
+    start_prompt:"Commence !", pct_success:function(p){ return p + "% réussi"; },
+    filter:"🔎 Filtrer", filter_active:function(l){ return "Filtre : " + l; },
+    fl_all:"toutes les cartes", fl_today:"cartes du jour", fl_7d:"7 derniers jours", fl_30d:"30 derniers jours", fl_hard:"cartes difficiles",
+    flmenu_all:"Toutes les cartes", flmenu_today:"Cartes du jour", flmenu_7d:"7 derniers jours", flmenu_30d:"30 derniers jours", flmenu_hard:"Cartes difficiles",
+    flip_hint:"Cliquer pour retourner",
+    btn_wrong:"✗ À revoir", btn_right:"✓ Je savais",
+    long_press_hint:"Appui long sur un bouton pour plus d'options",
+    empty_review:"Aucune carte archivée à réviser.", back_to_normal:"Retour au jeu normal",
+    empty_filter:function(l){ return "Aucune carte pour ce filtre (" + l + ")."; }, see_all:"Voir toutes les cartes",
+    empty_none:"Aucune carte disponible.",
+    word_in:function(name){ return "Mot en " + name; },
+    translation_in:function(name){ return "Traduction en " + name; },
+    optional:"(facultatif)",
+    ex1_label:"Phrase d'exemple 1", ex2_label:"Phrase d'exemple 2",
+    add_btn:"Ajouter la carte",
+    fill_both:"Remplis au moins le mot et sa traduction.",
+    card_added:function(w){ return 'Carte "' + w + '" ajoutée !'; },
+    sync_saving:"Sauvegarde...", sync_saved:"✓ Sauvegardé", sync_err:"⚠ Erreur de sauvegarde",
+    search_ph:"🔍 Rechercher un mot...",
+    exportt:"⬇ Exporter", importt:"⬆ Importer",
+    cards_active:"Cartes en jeu", cards_archived:"Cartes archivées",
+    hide:"Masquer ▲", show:"Afficher ▼",
+    review_archived_btn:"▶ Réviser les cartes archivées",
+    none_archived:"Aucune carte archivée", none_cards:"Aucune carte",
+    connected:"Connecté : ", logout:"Déconnexion",
+    options_title:"Options", edit_card:"✏️ Modifier la carte",
+    archive_card:"Archiver la carte", reactivate_card:"Remettre la carte en jeu",
+    delete_card:"Supprimer la carte", delete_card_deck:"Supprimer la carte du deck",
+    cancel:"Annuler", save_btn:"Enregistrer",
+    opts_card_title:"Options pour cette carte",
+    reactivate_desc:"Remettre la carte en jeu : la carte quitte les archivées et redevient une carte de jeu normale.",
+    answeropts_desc:"Mettre de côté : disparaît 1 mois puis revient.<br>Priorité maximale : apparaît 3× plus souvent 7 jours.<br>Archiver : place la carte dans les cartes archivées.",
+    sideline_btn:"Mettre de côté 1 mois 💤", priority_btn:"Priorité maximale 7 jours 🔥",
+    returning_title:"💤 Retour d'une carte",
+    returning_text:"Cette carte revient après 1 mois de pause 💤... tu la connais toujours ?",
+    ok:"OK",
+    filter_title:"Filtrer les cartes à réviser",
+    filter_desc:"Choisis un sous-ensemble de tes cartes en jeu. Le filtre reste actif jusqu'à ce que tu le changes (ou que tu rouvres l'appli).",
+    import_success:function(n){ return n + " cartes importées avec succès !"; },
+    import_invalid:"Fichier invalide.", import_error:"Erreur lors de la lecture du fichier.",
+    logout_confirm:"Se déconnecter ? Tes cartes sont sauvegardées dans le cloud.",
+    loading:"Chargement de tes cartes...",
+    login_subtitle:"Connecte-toi pour retrouver tes cartes sur tous tes appareils.",
+    login_google:"Se connecter avec Google", login_or_email:"ou par email",
+    login_email_ph:"ton@email.com",
+    login_gmail_hint:"💡 Tu as une adresse Gmail ? Utilise plutôt le bouton <b>« Se connecter avec Google »</b> ci-dessus : c'est instantané et sans attente.",
+    login_send:"Recevoir le lien de connexion", login_sending:"Envoi en cours...",
+    login_email_invalid:"Entre une adresse email valide.",
+    login_gmail_redirect:"Ton adresse est une adresse Google. Utilise plutôt le bouton <b>« Se connecter avec Google »</b> en haut : c'est instantané et tu retrouveras le même compte.",
+    login_link_sent:function(email){ return "✓ Un lien de connexion a été envoyé à<br><b>" + email + "</b><br><br>Ouvre ta boîte mail et clique sur le lien pour te connecter. Tu peux fermer cet onglet."; },
+    login_quota:"Trop de demandes d'emails aujourd'hui (limite Firebase). Essaie plutôt le bouton <b>Se connecter avec Google</b> ci-dessus, ou réessaie demain.",
+    login_error:function(m){ return "Erreur : " + m; }, login_cannot_send:"impossible d'envoyer le lien.",
+    login_google_cancel:"Connexion annulée. Réessaie.",
+    login_google_err:function(m){ return "Erreur de connexion Google : " + m; }, login_google_retry:"réessaie.",
+    login_link_expired:"Erreur de connexion : le lien est peut-être expiré. Réessaie.",
+    confirm_email_prompt:"Confirme ton adresse email pour terminer la connexion :",
+    footer_by:"Application développée par Matthieu Opitz",
+    pick_sub:"Choisis la langue · Scegli la lingua"
+  },
+  it: {
+    tab_study:"Studiare", tab_add:"Aggiungere", tab_cards:"Carte",
+    review_banner:"Ripasso delle carte archiviate", review_quit:"Esci",
+    day_count:function(n){ return "Giorno: " + n + " carte"; },
+    start_prompt:"Inizia!", pct_success:function(p){ return p + "% corretto"; },
+    filter:"🔎 Filtrare", filter_active:function(l){ return "Filtro: " + l; },
+    fl_all:"tutte le carte", fl_today:"carte del giorno", fl_7d:"ultimi 7 giorni", fl_30d:"ultimi 30 giorni", fl_hard:"carte difficili",
+    flmenu_all:"Tutte le carte", flmenu_today:"Carte del giorno", flmenu_7d:"Ultimi 7 giorni", flmenu_30d:"Ultimi 30 giorni", flmenu_hard:"Carte difficili",
+    flip_hint:"Tocca per girare",
+    btn_wrong:"✗ Da rivedere", btn_right:"✓ Lo sapevo",
+    long_press_hint:"Tieni premuto un pulsante per altre opzioni",
+    empty_review:"Nessuna carta archiviata da ripassare.", back_to_normal:"Torna al gioco normale",
+    empty_filter:function(l){ return "Nessuna carta per questo filtro (" + l + ")."; }, see_all:"Vedi tutte le carte",
+    empty_none:"Nessuna carta disponibile.",
+    word_in:function(name){ return "Parola in " + name; },
+    translation_in:function(name){ return "Traduzione in " + name; },
+    optional:"(facoltativo)",
+    ex1_label:"Frase d'esempio 1", ex2_label:"Frase d'esempio 2",
+    add_btn:"Aggiungere la carta",
+    fill_both:"Compila almeno la parola e la traduzione.",
+    card_added:function(w){ return 'Carta "' + w + '" aggiunta!'; },
+    sync_saving:"Salvataggio...", sync_saved:"✓ Salvato", sync_err:"⚠ Errore di salvataggio",
+    search_ph:"🔍 Cerca una parola...",
+    exportt:"⬇ Esportare", importt:"⬆ Importare",
+    cards_active:"Carte in gioco", cards_archived:"Carte archiviate",
+    hide:"Nascondi ▲", show:"Mostra ▼",
+    review_archived_btn:"▶ Ripassare le carte archiviate",
+    none_archived:"Nessuna carta archiviata", none_cards:"Nessuna carta",
+    connected:"Connesso: ", logout:"Disconnessione",
+    options_title:"Opzioni", edit_card:"✏️ Modificare la carta",
+    archive_card:"Archiviare la carta", reactivate_card:"Rimettere la carta in gioco",
+    delete_card:"Eliminare la carta", delete_card_deck:"Eliminare la carta dal mazzo",
+    cancel:"Annullare", save_btn:"Salvare",
+    opts_card_title:"Opzioni per questa carta",
+    reactivate_desc:"Rimettere la carta in gioco: la carta esce dalle archiviate e torna una carta di gioco normale.",
+    answeropts_desc:"Mettere da parte: sparisce 1 mese poi torna.<br>Priorità massima: appare 3× più spesso per 7 giorni.<br>Archiviare: mette la carta tra le carte archiviate.",
+    sideline_btn:"Mettere da parte 1 mese 💤", priority_btn:"Priorità massima 7 giorni 🔥",
+    returning_title:"💤 Ritorno di una carta",
+    returning_text:"Questa carta torna dopo 1 mese di pausa 💤... la sai ancora?",
+    ok:"OK",
+    filter_title:"Filtrare le carte da ripassare",
+    filter_desc:"Scegli un sottoinsieme delle tue carte in gioco. Il filtro resta attivo finché non lo cambi (o finché non riapri l'app).",
+    import_success:function(n){ return n + " carte importate con successo!"; },
+    import_invalid:"File non valido.", import_error:"Errore durante la lettura del file.",
+    logout_confirm:"Disconnettersi? Le tue carte sono salvate nel cloud.",
+    loading:"Caricamento delle tue carte...",
+    login_subtitle:"Accedi per ritrovare le tue carte su tutti i tuoi dispositivi.",
+    login_google:"Accedi con Google", login_or_email:"o tramite email",
+    login_email_ph:"tua@email.com",
+    login_gmail_hint:"💡 Hai un indirizzo Gmail? Usa piuttosto il pulsante <b>« Accedi con Google »</b> qui sopra: è immediato e senza attese.",
+    login_send:"Ricevere il link di accesso", login_sending:"Invio in corso...",
+    login_email_invalid:"Inserisci un indirizzo email valido.",
+    login_gmail_redirect:"Il tuo indirizzo è un indirizzo Google. Usa piuttosto il pulsante <b>« Accedi con Google »</b> in alto: è immediato e ritroverai lo stesso account.",
+    login_link_sent:function(email){ return "✓ Un link di accesso è stato inviato a<br><b>" + email + "</b><br><br>Apri la tua casella email e clicca sul link per accedere. Puoi chiudere questa scheda."; },
+    login_quota:"Troppe richieste di email oggi (limite Firebase). Prova piuttosto il pulsante <b>Accedi con Google</b> qui sopra, o riprova domani.",
+    login_error:function(m){ return "Errore: " + m; }, login_cannot_send:"impossibile inviare il link.",
+    login_google_cancel:"Accesso annullato. Riprova.",
+    login_google_err:function(m){ return "Errore di accesso Google: " + m; }, login_google_retry:"riprova.",
+    login_link_expired:"Errore di accesso: il link potrebbe essere scaduto. Riprova.",
+    confirm_email_prompt:"Conferma il tuo indirizzo email per completare l'accesso:",
+    footer_by:"App sviluppata da Matthieu Opitz",
+    pick_sub:"Scegli la lingua · Choisis la langue"
+  }
+};
+
+// Langue de l'interface avant connexion : celle du navigateur (it sinon fr)
+var loginLang = ((navigator.language || "fr").toLowerCase().slice(0,2) === "it") ? "it" : "fr";
+var uiLang = loginLang;
+function t(k){
+  var tbl = UI[uiLang] || UI.fr;
+  var v = tbl[k];
+  if (v === undefined) v = UI.fr[k];
+  if (typeof v === "function") return v.apply(null, Array.prototype.slice.call(arguments, 1));
+  return v;
+}
 
 // ===== Utilitaires =====
 function cleanEmoji(val) {
@@ -223,7 +438,7 @@ var lastCardId = null;
 var searchQuery = "";
 var masteredOpen = false;
 var reviewMode = false;
-var studyFilter = "all"; // all | today | 7d | 30d | hard (filtre des cartes en jeu)
+var studyFilter = "all";
 var currentUser = null;
 var syncState = "";
 
@@ -246,15 +461,17 @@ function localKey() { return currentUser ? "fc_cards_" + currentUser.uid : "fc_c
 function localScoresKey() { return currentUser ? "fc_scores_" + currentUser.uid : "fc_scores"; }
 
 function saveLocal() {
+  if (PREVIEW) return;
   localStorage.setItem(localKey(), JSON.stringify(cards));
   localStorage.setItem(localScoresKey(), JSON.stringify(scores));
 }
 
 var saveTimeout = null;
 function save() {
+  if (PREVIEW) return;
   saveLocal();
   if (currentUser) {
-    syncState = "Sauvegarde...";
+    syncState = t("sync_saving");
     updateSyncStatus();
     if (saveTimeout) clearTimeout(saveTimeout);
     saveTimeout = setTimeout(saveToCloud, 800);
@@ -262,22 +479,24 @@ function save() {
 }
 
 async function saveToCloud() {
-  if (!currentUser) return;
+  if (!currentUser || PREVIEW) return;
   try {
     await setDoc(doc(db, "users", currentUser.uid), {
-      cards: cards, scores: scores, updated: Date.now()
+      cards: cards, scores: scores, mode: MODE, updated: Date.now()
     });
-    syncState = "✓ Sauvegardé";
+    syncState = t("sync_saved");
     updateSyncStatus();
     setTimeout(function(){ syncState = ""; updateSyncStatus(); }, 2000);
   } catch (err) {
-    syncState = "⚠ Erreur de sauvegarde";
+    syncState = t("sync_err");
     updateSyncStatus();
   }
 }
 
+// Charge le compte. Retourne { needsPicker:true } si c'est un nouveau compte
+// sans cartes ni mode (→ écran de choix de langue).
 async function loadFromCloud() {
-  if (!currentUser) return;
+  if (!currentUser) return { needsPicker:false };
   try {
     var snap = await getDoc(doc(db, "users", currentUser.uid));
     if (snap.exists()) {
@@ -288,42 +507,28 @@ async function loadFromCloud() {
       } else {
         cards = INITIAL_CARDS.map(normalizeCard); scores = {};
       }
+      MODE = (data.mode && data.mode.known && data.mode.learn)
+        ? { known: data.mode.known, learn: data.mode.learn }
+        : { known: "fr", learn: "it" };   // comptes existants = FR→IT
+      nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
+      saveLocal();
+      return { needsPicker:false };
     } else {
-      var migrated = tryMigrateLocalCards();
-      if (!migrated) {
-        cards = INITIAL_CARDS.map(normalizeCard); scores = {};
-      }
-      await saveToCloud();
+      // Nouveau compte (aucun document cloud) → écran de choix de la langue.
+      // (Plus de migration automatique depuis le cache local : elle faisait hériter
+      //  les cartes d'un autre compte présent sur l'appareil et sautait l'écran de choix.)
+      return { needsPicker:true };
     }
-    nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
-    saveLocal();
   } catch (err) {
+    // Hors-ligne : on retombe sur le cache local, en supposant FR→IT.
     var lr = null;
     try { lr = JSON.parse(localStorage.getItem(localKey()) || "null"); } catch (e) {}
     cards = (lr && Array.isArray(lr)) ? lr.map(normalizeCard) : INITIAL_CARDS.map(normalizeCard);
     try { scores = JSON.parse(localStorage.getItem(localScoresKey()) || "{}"); } catch (e) { scores = {}; }
+    MODE = { known: "fr", learn: "it" };
     nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
+    return { needsPicker:false };
   }
-}
-
-function tryMigrateLocalCards() {
-  var candidates = [
-    { c: "fc_cards_" + currentUser.uid, s: "fc_scores_" + currentUser.uid },
-    { c: "fc_cards", s: "fc_scores" }
-  ];
-  for (var i = 0; i < candidates.length; i++) {
-    var raw = null;
-    try { raw = JSON.parse(localStorage.getItem(candidates[i].c) || "null"); } catch (e) { raw = null; }
-    if (raw && Array.isArray(raw) && raw.length > 0) {
-      var hasUserCards = raw.length > 5 || raw.some(function(c){ return c.id > 5; });
-      if (hasUserCards) {
-        cards = raw.map(normalizeCard);
-        try { scores = JSON.parse(localStorage.getItem(candidates[i].s) || "{}"); } catch (e) { scores = {}; }
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 function updateSyncStatus() {
@@ -343,14 +548,12 @@ function isReturningCard(c) {
   var s = scores[c.id];
   return !!(s && s.sidelined && Date.now() >= s.sidelined);
 }
-// Début de journée calendaire il y a "daysBack" jours (en millisecondes)
 function startOfDayOffset(daysBack) {
   var d = new Date();
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() - daysBack);
   return d.getTime();
 }
-// Carte difficile : au moins 2 ratés sur les 5 dernières réponses
 function isHardCard(c) {
   var s = scores[c.id];
   if (!s || !s.history) return false;
@@ -367,16 +570,15 @@ function matchesFilter(c, f) {
   return true;
 }
 function filterLabel(f) {
-  if (f === "today") return "cartes du jour";
-  if (f === "7d") return "7 derniers jours";
-  if (f === "30d") return "30 derniers jours";
-  if (f === "hard") return "cartes difficiles";
-  return "toutes les cartes";
+  if (f === "today") return t("fl_today");
+  if (f === "7d") return t("fl_7d");
+  if (f === "30d") return t("fl_30d");
+  if (f === "hard") return t("fl_hard");
+  return t("fl_all");
 }
 
 function buildDeck() {
   var pool = cards.filter(function(c){ return reviewMode ? c.archived : isCardActive(c); });
-  // Filtre ciblé : uniquement en mode normal (pas en révision des archivées)
   var filterActive = (!reviewMode && studyFilter !== "all");
   if (filterActive) {
     pool = pool.filter(function(c){ return matchesFilter(c, studyFilter); });
@@ -386,7 +588,7 @@ function buildDeck() {
   pool.forEach(function(c, i) {
     var w;
     if (filterActive) {
-      w = 1; // passage égal quand un filtre est actif
+      w = 1;
     } else {
       var s = scores[c.id] || { right: 0, wrong: 0 };
       w = Math.max(1, 1 + (s.wrong || 0) * 2 - (s.right || 0));
@@ -424,36 +626,36 @@ function render() {
   var card = deck[idx];
 
   var html = "";
-  html += "<h2>🇮🇹 Flashcards Italien</h2>";
+  html += "<h2>" + appTitle() + "</h2>";
   html += "<div class='tabs'>";
-  html += "<button class='tab " + (view==="study"?"active":"") + "' onclick=\"setView('study')\">Étudier</button>";
-  html += "<button class='tab " + (view==="add"?"active":"") + "' onclick=\"setView('add')\">Ajouter</button>";
-  html += "<button class='tab " + (view==="stats"?"active":"") + "' onclick=\"setView('stats')\">Cartes</button>";
+  html += "<button class='tab " + (view==="study"?"active":"") + "' onclick=\"setView('study')\">" + t("tab_study") + "</button>";
+  html += "<button class='tab " + (view==="add"?"active":"") + "' onclick=\"setView('add')\">" + t("tab_add") + "</button>";
+  html += "<button class='tab " + (view==="stats"?"active":"") + "' onclick=\"setView('stats')\">" + t("tab_cards") + "</button>";
   html += "</div>";
 
   if (view === "study") {
     if (reviewMode) {
-      html += "<div class='review-banner'><span>Révision des cartes archivées</span><button onclick='exitReview()'>Quitter</button></div>";
+      html += "<div class='review-banner'><span>" + t("review_banner") + "</span><button onclick='exitReview()'>" + t("review_quit") + "</button></div>";
     }
     html += "<div class='session-bar'>";
-    html += "<span>Jour : " + total + " cartes</span>";
-    html += "<span style='color:" + (pct===null?"#888":(pct>=70?"#009246":"#CE2B37")) + "'>" + (pct===null?"Commence !":pct+"% réussi") + "</span>";
+    html += "<span>" + t("day_count", total) + "</span>";
+    html += "<span style='color:" + (pct===null?"#888":(pct>=70?"var(--success)":"var(--danger)")) + "'>" + (pct===null?t("start_prompt"):t("pct_success", pct)) + "</span>";
     html += "</div>";
 
     if (!reviewMode) {
       var fActive = studyFilter !== "all";
       html += "<button class='btn-filter" + (fActive ? " active" : "") + "' onclick='openFilterMenu()'>" +
-              (fActive ? ("Filtre : " + filterLabel(studyFilter)) : "🔎 Filtrer") + "</button>";
+              (fActive ? t("filter_active", filterLabel(studyFilter)) : t("filter")) + "</button>";
     }
 
     if (card) {
-      var frText = escWrap(card.fr);
-      var itText = renderAccent(card.it);
-      var front = card.reversed ? itText : frText;
-      var back  = card.reversed ? frText : itText;
-      var lang  = card.reversed ? "🇮🇹 → 🇫🇷" : "🇫🇷 → 🇮🇹";
+      var knownText = escWrap(card[MODE.known]);
+      var learnText = renderAccent(card[MODE.learn]);
+      var front = card.reversed ? learnText : knownText;
+      var back  = card.reversed ? knownText : learnText;
+      var lang  = card.reversed ? (flagL() + " → " + flagK()) : (flagK() + " → " + flagL());
       var e = card.emoji;
-      var audioBtn = "<button class='btn-audio' onclick=\"event.stopPropagation(); speakWord(" + card.id + ")\" aria-label='Écouter la prononciation'>🔊</button>";
+      var audioBtn = "<button class='btn-audio' onclick=\"event.stopPropagation(); speakWord(" + card.id + ")\" aria-label='audio'>🔊</button>";
 
       html += "<div class='card-wrap' onclick='flipCard()'>";
       html += "<div class='card-inner " + (flipped?"flipped":"") + "'>";
@@ -462,46 +664,46 @@ function render() {
       html += "<div class='card-word'>" + front + "</div>";
       if (card.reversed) html += audioBtn;
       html += "<div class='card-lang'>" + lang + "</div>";
-      html += "<div class='card-hint'>Cliquer pour retourner</div>";
+      html += "<div class='card-hint'>" + t("flip_hint") + "</div>";
       html += "</div>";
       html += "<div class='card-face card-back'>";
       if (e) html += "<div class='card-emoji'>" + e + "</div>";
       html += "<div class='card-word'>" + back + "</div>";
       if (!card.reversed) html += audioBtn;
       html += "<div class='card-sub'>" + front + "</div>";
-      if (card.example) html += "<div class='card-example first'>« " + esc(card.example) + " » <button class='btn-audio-sm' onclick=\"event.stopPropagation(); speakExample(" + card.id + ", 1)\" aria-label='Écouter la phrase'>🔊</button></div>";
-      if (card.example2) html += "<div class='card-example second'>« " + esc(card.example2) + " » <button class='btn-audio-sm' onclick=\"event.stopPropagation(); speakExample(" + card.id + ", 2)\" aria-label='Écouter la phrase'>🔊</button></div>";
+      if (card.example) html += "<div class='card-example first'>« " + esc(card.example) + " » <button class='btn-audio-sm' onclick=\"event.stopPropagation(); speakExample(" + card.id + ", 1)\" aria-label='audio'>🔊</button></div>";
+      if (card.example2) html += "<div class='card-example second'>« " + esc(card.example2) + " » <button class='btn-audio-sm' onclick=\"event.stopPropagation(); speakExample(" + card.id + ", 2)\" aria-label='audio'>🔊</button></div>";
       html += "</div>";
       html += "</div>";
       html += "</div>";
 
       html += "<div id='answer-btns' class='answer-btns' style='display:" + (flipped?"flex":"none") + "'>";
-      html += "<button class='btn-wrong' id='btn-wrong' onclick=\"flashBtn('btn-wrong', false)\" onmousedown='startBtnPress()' onmouseup='cancelBtnPress()' onmouseleave='cancelBtnPress()' ontouchstart='startBtnPress()' ontouchend='cancelBtnPress()' ontouchcancel='cancelBtnPress()'>✗ À revoir</button>";
-      html += "<button class='btn-right' id='btn-right' onclick=\"flashBtn('btn-right', true)\" onmousedown='startBtnPress()' onmouseup='cancelBtnPress()' onmouseleave='cancelBtnPress()' ontouchstart='startBtnPress()' ontouchend='cancelBtnPress()' ontouchcancel='cancelBtnPress()'>✓ Je savais</button>";
+      html += "<button class='btn-wrong' id='btn-wrong' onclick=\"flashBtn('btn-wrong', false)\" onmousedown='startBtnPress()' onmouseup='cancelBtnPress()' onmouseleave='cancelBtnPress()' ontouchstart='startBtnPress()' ontouchend='cancelBtnPress()' ontouchcancel='cancelBtnPress()'>" + t("btn_wrong") + "</button>";
+      html += "<button class='btn-right' id='btn-right' onclick=\"flashBtn('btn-right', true)\" onmousedown='startBtnPress()' onmouseup='cancelBtnPress()' onmouseleave='cancelBtnPress()' ontouchstart='startBtnPress()' ontouchend='cancelBtnPress()' ontouchcancel='cancelBtnPress()'>" + t("btn_right") + "</button>";
       html += "</div>";
-      html += "<p id='btn-hint' class='btn-hint' style='display:" + (flipped?"block":"none") + "'>Appui long sur un bouton pour plus d'options</p>";
+      html += "<p id='btn-hint' class='btn-hint' style='display:" + (flipped?"block":"none") + "'>" + t("long_press_hint") + "</p>";
     } else {
       if (reviewMode) {
-        html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte archivée à réviser.<br><button onclick='exitReview()' style='margin-top:12px;padding:10px 18px;border-radius:12px;border:1.5px solid #009246;background:transparent;color:#009246;font-size:15px;cursor:pointer'>Retour au jeu normal</button></p>";
+        html += "<p style='text-align:center;padding:3rem 0;color:#888'>" + t("empty_review") + "<br><button onclick='exitReview()' style='margin-top:12px;padding:10px 18px;border-radius:12px;border:1.5px solid var(--primary);background:transparent;color:var(--primary);font-size:15px;cursor:pointer'>" + t("back_to_normal") + "</button></p>";
       } else if (studyFilter !== "all") {
-        html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte pour ce filtre (" + filterLabel(studyFilter) + ").<br><button onclick=\"setFilter('all')\" style='margin-top:12px;padding:10px 18px;border-radius:12px;border:1.5px solid #009246;background:transparent;color:#009246;font-size:15px;cursor:pointer'>Voir toutes les cartes</button></p>";
+        html += "<p style='text-align:center;padding:3rem 0;color:#888'>" + t("empty_filter", filterLabel(studyFilter)) + "<br><button onclick=\"setFilter('all')\" style='margin-top:12px;padding:10px 18px;border-radius:12px;border:1.5px solid var(--primary);background:transparent;color:var(--primary);font-size:15px;cursor:pointer'>" + t("see_all") + "</button></p>";
       } else {
-        html += "<p style='text-align:center;padding:3rem 0;color:#888'>Aucune carte disponible.</p>";
+        html += "<p style='text-align:center;padding:3rem 0;color:#888'>" + t("empty_none") + "</p>";
       }
     }
   }
 
   if (view === "add") {
     html += "<div class='form-card'>";
-    html += "<label class='form-label'>Mot en français</label>";
-    html += "<input class='form-input' id='inp-fr' placeholder='ex : le vélo' />";
-    html += "<label class='form-label'>Traduction italienne</label>";
-    html += "<input class='form-input' id='inp-it' placeholder='ex : la bicicletta' />";
-    html += "<label class='form-label'>Phrase d'exemple 1 <span style='color:#bbb;font-weight:400'>(facultatif)</span></label>";
-    html += "<input class='form-input' id='inp-ex' placeholder='ex : Vado a scuola in bicicletta' />";
-    html += "<label class='form-label'>Phrase d'exemple 2 <span style='color:#bbb;font-weight:400'>(facultatif)</span></label>";
-    html += "<input class='form-input' id='inp-ex2' placeholder='ex : Mi piace la bicicletta rossa' onkeydown=\"if(event.key==='Enter')addCard()\" />";
-    html += "<button class='btn-add' onclick='addCard()'>Ajouter la carte</button>";
+    html += "<label class='form-label'>" + t("word_in", knownName()) + "</label>";
+    html += "<input class='form-input' id='inp-known' placeholder='" + esc("ex : " + LANGS[MODE.known].sampleWord) + "' />";
+    html += "<label class='form-label'>" + t("translation_in", learnName()) + "</label>";
+    html += "<input class='form-input' id='inp-learn' placeholder='" + esc("ex : " + LANGS[MODE.learn].sampleWord) + "' />";
+    html += "<label class='form-label'>" + t("ex1_label") + " <span style='color:#bbb;font-weight:400'>" + t("optional") + "</span></label>";
+    html += "<input class='form-input' id='inp-ex' placeholder='" + esc("ex : " + LANGS[MODE.learn].sampleS1) + "' />";
+    html += "<label class='form-label'>" + t("ex2_label") + " <span style='color:#bbb;font-weight:400'>" + t("optional") + "</span></label>";
+    html += "<input class='form-input' id='inp-ex2' placeholder='" + esc("ex : " + LANGS[MODE.learn].sampleS2) + "' onkeydown=\"if(event.key==='Enter')addCard()\" />";
+    html += "<button class='btn-add' onclick='addCard()'>" + t("add_btn") + "</button>";
     html += "<div id='add-msg' class='add-msg'></div>";
     html += "</div>";
   }
@@ -513,39 +715,40 @@ function render() {
     html += "<div id='sync-status' class='sync-status'>" + syncState + "</div>";
 
     html += "<div class='deck-top'>";
-    html += "<input class='search-box' id='search-input' placeholder='🔍 Rechercher un mot...' value=\"" + esc(searchQuery) + "\" oninput='updateSearch(this.value)' />";
+    html += "<input class='search-box' id='search-input' placeholder='" + esc(t("search_ph")) + "' value=\"" + esc(searchQuery) + "\" oninput='updateSearch(this.value)' />";
     html += "</div>";
 
     html += "<div class='export-btns'>";
-    html += "<button class='btn-export' onclick='exportCards()'>⬇ Exporter</button>";
-    html += "<button class='btn-import' onclick=\"document.getElementById('import-input').click()\">⬆ Importer</button>";
+    html += "<button class='btn-export' onclick='exportCards()'>" + t("exportt") + "</button>";
+    html += "<button class='btn-import' onclick=\"document.getElementById('import-input').click()\">" + t("importt") + "</button>";
     html += "</div>";
 
     html += "<div class='list-block'>";
-    html += "<div class='list-header'><span class='list-title'>Cartes en jeu <span class='count'>(" + activeCards.length + ")</span></span></div>";
+    html += "<div class='list-header'><span class='list-title'>" + t("cards_active") + " <span class='count'>(" + activeCards.length + ")</span></span></div>";
     html += "<div class='list-scroll' id='active-list'>" + buildListHtml(false) + "</div>";
     html += "</div>";
 
     html += "<div class='list-block mastered-block'>";
     html += "<div class='list-header'>";
-    html += "<span class='list-title'>Cartes archivées <span class='count' style='color:#9a7524'>(" + masteredCards.length + ")</span></span>";
-    html += "<button class='collapse-btn' onclick='toggleMastered()'>" + (masteredOpen ? "Masquer ▲" : "Afficher ▼") + "</button>";
+    html += "<span class='list-title'>" + t("cards_archived") + " <span class='count' style='color:#9a7524'>(" + masteredCards.length + ")</span></span>";
+    html += "<button class='collapse-btn' onclick='toggleMastered()'>" + (masteredOpen ? t("hide") : t("show")) + "</button>";
     html += "</div>";
     if (masteredOpen) {
       if (masteredCards.length > 0) {
-        html += "<button class='btn-review-mastered' id='btn-review' onclick='startReviewDelayed()'>▶ Réviser les cartes archivées</button>";
+        html += "<button class='btn-review-mastered' id='btn-review' onclick='startReviewDelayed()'>" + t("review_archived_btn") + "</button>";
       }
       html += "<div class='list-scroll' id='mastered-list'>" + buildListHtml(true) + "</div>";
     }
     html += "</div>";
 
     if (currentUser) {
-      var who = currentUser.email || "compte connecté";
-      html += "<p style='text-align:center;font-size:12px;color:#aaa;margin-top:8px'>Connecté : " + esc(who) + " · <button class='logout-link' onclick='doLogout()'>Déconnexion</button></p>";
+      var who = currentUser.email || "";
+      html += "<p style='text-align:center;font-size:12px;color:#aaa;margin-top:8px'>" + t("connected") + esc(who) + " · <button class='logout-link' onclick='doLogout()'>" + t("logout") + "</button></p>";
     }
   }
 
   root.innerHTML = html;
+  setFooter();
 
   var doRestore = function() {
     var a2 = document.getElementById("active-list");
@@ -567,7 +770,7 @@ function buildListHtml(archived) {
   if (searchQuery) {
     var q = searchQuery.toLowerCase();
     list = list.filter(function(c) {
-      return c.fr.toLowerCase().indexOf(q) !== -1 || stripAccent(c.it).toLowerCase().indexOf(q) !== -1;
+      return String(c[MODE.known]).toLowerCase().indexOf(q) !== -1 || stripAccent(c[MODE.learn]).toLowerCase().indexOf(q) !== -1;
     });
   }
   var html = "";
@@ -576,7 +779,7 @@ function buildListHtml(archived) {
     var hist = (s.history || []).slice(-5);
     var dotsHtml = "";
     for (var di = 0; di < 5; di++) {
-      var col = di < hist.length ? (hist[di] ? "#009246" : "#CE2B37") : "#ddd";
+      var col = di < hist.length ? (hist[di] ? "var(--success)" : "var(--danger)") : "#ddd";
       dotsHtml += "<span style='display:inline-block;width:11px;height:11px;border-radius:50%;background:" + col + ";margin-left:3px'></span>";
     }
     var isSidelined = s.sidelined && Date.now() < s.sidelined;
@@ -584,12 +787,12 @@ function buildListHtml(archived) {
     var badge = archived ? "" : (isSidelined ? " 💤" : (isPriority ? " 🔥" : ""));
 
     html += "<div class='stat-row'>";
-    html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + esc(c.fr) + " → " + esc(stripAccent(c.it)) + badge + "</span>";
+    html += "<span class='stat-row-word' onmousedown='startPress(" + c.id + ")' onmouseup='cancelPress()' onmouseleave='cancelPress()' ontouchstart='startPress(" + c.id + ")' ontouchend='cancelPress()' ontouchcancel='cancelPress()'>" + esc(c[MODE.known]) + " → " + esc(stripAccent(c[MODE.learn])) + badge + "</span>";
     html += "<span style='white-space:nowrap'>" + dotsHtml + "</span>";
     html += "<button class='row-plus' onclick='openRowMenu(" + c.id + "," + (archived ? "true" : "false") + ")'>+</button>";
     html += "</div>";
   });
-  if (list.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>" + (archived ? "Aucune carte archivée" : "Aucune carte") + "</p>";
+  if (list.length === 0) html += "<p style='text-align:center;color:#aaa;font-size:14px;padding:1rem 0'>" + (archived ? t("none_archived") : t("none_cards")) + "</p>";
   return html;
 }
 
@@ -639,10 +842,11 @@ function flashBtn(id, correct) {
   btnPressTimer = null;
   var btn = document.getElementById(id);
   var cardInner = document.querySelector(".card-inner");
-  var col = correct ? "#009246" : "#CE2B37";
+  var col = correct ? THEME.success : THEME.danger;
+  var rgb = correct ? THEME.successRgb : THEME.dangerRgb;
   if (btn) btn.classList.add("flash");
   if (cardInner) {
-    cardInner.style.boxShadow = correct ? "0 0 0 5px rgba(0,146,70,0.30)" : "0 0 0 5px rgba(206,43,55,0.30)";
+    cardInner.style.boxShadow = "0 0 0 5px rgba(" + rgb + ",0.30)";
     cardInner.style.borderRadius = "16px";
     var faces = cardInner.querySelectorAll(".card-face");
     for (var i = 0; i < faces.length; i++) faces[i].style.borderColor = col;
@@ -681,20 +885,22 @@ function answer(correct) {
 }
 
 function addCard() {
-  var fr = document.getElementById("inp-fr").value.trim();
-  var it = document.getElementById("inp-it").value.trim();
+  var kv = document.getElementById("inp-known").value.trim();
+  var lv = document.getElementById("inp-learn").value.trim();
   var ex = document.getElementById("inp-ex").value.trim();
   var ex2 = document.getElementById("inp-ex2").value.trim();
   var msg = document.getElementById("add-msg");
-  if (!fr || !it) { msg.className = "add-msg err"; msg.textContent = "Remplis au moins le mot et sa traduction."; return; }
-  cards.push({ id: nextId++, fr: fr, it: it, example: ex || null, example2: ex2 || null, emoji: null, archived: false, createdAt: Date.now() });
+  if (!kv || !lv) { msg.className = "add-msg err"; msg.textContent = t("fill_both"); return; }
+  var obj = { id: nextId++, example: ex || null, example2: ex2 || null, emoji: null, archived: false, createdAt: Date.now() };
+  obj[MODE.known] = kv; obj[MODE.learn] = lv;
+  cards.push(obj);
   save(); buildDeck();
-  document.getElementById("inp-fr").value = "";
-  document.getElementById("inp-it").value = "";
+  document.getElementById("inp-known").value = "";
+  document.getElementById("inp-learn").value = "";
   document.getElementById("inp-ex").value = "";
   document.getElementById("inp-ex2").value = "";
   msg.className = "add-msg ok";
-  msg.textContent = "Carte \"" + fr + "\" ajoutée !";
+  msg.textContent = t("card_added", kv);
 }
 
 function startPress(id) { pressTimer = setTimeout(function(){ openEditModal(id); }, 600); }
@@ -704,17 +910,17 @@ function openRowMenu(id, archived) {
   var c = cards.find(function(x){ return x.id === id; });
   if (!c) return;
   var opts = "";
-  opts += "<button class='modal-option' onclick='openEditModal(" + id + ")'>✏️ Modifier la carte</button>";
+  opts += "<button class='modal-option' onclick='openEditModal(" + id + ")'>" + t("edit_card") + "</button>";
   if (archived) {
-    opts += "<button class='modal-option reactivate' id='rm-react' onclick=\"flashOption('rm-react','flash-green', function(){ reactivateCard(" + id + "); })\">Remettre la carte en jeu</button>";
+    opts += "<button class='modal-option reactivate' id='rm-react' onclick=\"flashOption('rm-react','flash-green', function(){ reactivateCard(" + id + "); })\">" + t("reactivate_card") + "</button>";
   } else {
-    opts += "<button class='modal-option archive' id='rm-arch' onclick=\"flashOption('rm-arch','flash-gold', function(){ archiveCard(" + id + "); })\">Archiver la carte</button>";
+    opts += "<button class='modal-option archive' id='rm-arch' onclick=\"flashOption('rm-arch','flash-gold', function(){ archiveCard(" + id + "); })\">" + t("archive_card") + "</button>";
   }
-  opts += "<button class='modal-option danger' id='rm-del' onclick=\"flashOption('rm-del','flash-red', function(){ deleteFromMenu(" + id + "); })\">Supprimer la carte</button>";
+  opts += "<button class='modal-option danger' id='rm-del' onclick=\"flashOption('rm-del','flash-red', function(){ deleteFromMenu(" + id + "); })\">" + t("delete_card") + "</button>";
   document.getElementById("modal-container").innerHTML =
     "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
     "<button class='modal-close' onclick='closeModal()'>×</button>" +
-    "<h3>Options</h3><div style='margin-top:8px'>" + opts + "</div></div></div>";
+    "<h3>" + t("options_title") + "</h3><div style='margin-top:8px'>" + opts + "</div></div></div>";
 }
 
 function deleteFromMenu(id) {
@@ -729,32 +935,34 @@ function openEditModal(id) {
   document.getElementById("modal-container").innerHTML =
     "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
     "<button class='modal-close' onclick='closeModal()'>×</button>" +
-    "<h3>✏️ Modifier la carte</h3>" +
-    "<label class='form-label'>Mot en français</label>" +
-    "<input class='form-input' id='edit-fr' value=\"" + esc(c.fr) + "\" />" +
-    "<label class='form-label'>Traduction italienne</label>" +
-    "<input class='form-input' id='edit-it' value=\"" + esc(c.it) + "\" />" +
-    "<label class='form-label'>Phrase d'exemple 1</label>" +
+    "<h3>" + t("edit_card") + "</h3>" +
+    "<label class='form-label'>" + t("word_in", knownName()) + "</label>" +
+    "<input class='form-input' id='edit-known' value=\"" + esc(c[MODE.known]) + "\" />" +
+    "<label class='form-label'>" + t("translation_in", learnName()) + "</label>" +
+    "<input class='form-input' id='edit-learn' value=\"" + esc(c[MODE.learn]) + "\" />" +
+    "<label class='form-label'>" + t("ex1_label") + "</label>" +
     "<input class='form-input' id='edit-ex' value=\"" + esc(c.example) + "\" />" +
-    "<label class='form-label'>Phrase d'exemple 2</label>" +
+    "<label class='form-label'>" + t("ex2_label") + "</label>" +
     "<input class='form-input' id='edit-ex2' value=\"" + esc(c.example2) + "\" />" +
     "<div class='modal-btns'>" +
-    "<button class='btn-cancel' onclick='closeModal()'>Annuler</button>" +
-    "<button class='btn-save' onclick='saveEdit(" + id + ")'>Enregistrer</button>" +
+    "<button class='btn-cancel' onclick='closeModal()'>" + t("cancel") + "</button>" +
+    "<button class='btn-save' onclick='saveEdit(" + id + ")'>" + t("save_btn") + "</button>" +
     "</div></div></div>";
 }
 
 function closeModal() { document.getElementById("modal-container").innerHTML = ""; }
 
 function saveEdit(id) {
-  var fr = document.getElementById("edit-fr").value.trim();
-  var it = document.getElementById("edit-it").value.trim();
+  var kv = document.getElementById("edit-known").value.trim();
+  var lv = document.getElementById("edit-learn").value.trim();
   var ex = document.getElementById("edit-ex").value.trim();
   var ex2 = document.getElementById("edit-ex2").value.trim();
-  if (!fr || !it) return;
+  if (!kv || !lv) return;
   var i = cards.findIndex(function(c){ return c.id === id; });
   if (i === -1) return;
-  cards[i] = Object.assign({}, cards[i], { fr: fr, it: it, example: ex || null, example2: ex2 || null });
+  var upd = { example: ex || null, example2: ex2 || null };
+  upd[MODE.known] = kv; upd[MODE.learn] = lv;
+  cards[i] = Object.assign({}, cards[i], upd);
   save(); buildDeck(); closeModal(); render();
 }
 
@@ -767,21 +975,21 @@ function showAnswerOptions() {
     modal.innerHTML =
       "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
       "<button class='modal-close' onclick='closeModal()'>×</button>" +
-      "<h3>Options pour cette carte</h3>" +
-      "<p class='modal-desc'>Remettre la carte en jeu : la carte quitte les archivées et redevient une carte de jeu normale.</p>" +
-      "<button class='modal-option reactivate' id='opt-react' onclick=\"flashOption('opt-react','flash-green', function(){ reactivateCard(" + cardId + "); })\">Remettre la carte en jeu</button>" +
-      "<button class='modal-option danger' id='opt-del' onclick=\"flashOption('opt-del','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">Supprimer la carte</button>" +
+      "<h3>" + t("opts_card_title") + "</h3>" +
+      "<p class='modal-desc'>" + t("reactivate_desc") + "</p>" +
+      "<button class='modal-option reactivate' id='opt-react' onclick=\"flashOption('opt-react','flash-green', function(){ reactivateCard(" + cardId + "); })\">" + t("reactivate_card") + "</button>" +
+      "<button class='modal-option danger' id='opt-del' onclick=\"flashOption('opt-del','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">" + t("delete_card") + "</button>" +
       "</div></div>";
   } else {
     modal.innerHTML =
       "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
       "<button class='modal-close' onclick='closeModal()'>×</button>" +
-      "<h3>Options pour cette carte</h3>" +
-      "<p class='modal-desc'>Mettre de côté : disparaît 1 mois puis revient.<br>Priorité maximale : apparaît 3× plus souvent 7 jours.<br>Archiver : place la carte dans les cartes archivées.</p>" +
-      "<button class='modal-option sideline' id='opt-sideline' onclick=\"flashOption('opt-sideline','flash-blue', function(){ sidelineCard(" + cardId + "); })\">Mettre de côté 1 mois 💤</button>" +
-      "<button class='modal-option priority' id='opt-priority' onclick=\"flashOption('opt-priority','flash-orange', function(){ prioritizeCard(" + cardId + "); })\">Priorité maximale 7 jours 🔥</button>" +
-      "<button class='modal-option archive' id='opt-archive' onclick=\"flashOption('opt-archive','flash-gold', function(){ archiveCard(" + cardId + "); })\">Archiver la carte</button>" +
-      "<button class='modal-option danger' id='opt-delete' onclick=\"flashOption('opt-delete','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">Supprimer la carte du deck</button>" +
+      "<h3>" + t("opts_card_title") + "</h3>" +
+      "<p class='modal-desc'>" + t("answeropts_desc") + "</p>" +
+      "<button class='modal-option sideline' id='opt-sideline' onclick=\"flashOption('opt-sideline','flash-blue', function(){ sidelineCard(" + cardId + "); })\">" + t("sideline_btn") + "</button>" +
+      "<button class='modal-option priority' id='opt-priority' onclick=\"flashOption('opt-priority','flash-orange', function(){ prioritizeCard(" + cardId + "); })\">" + t("priority_btn") + "</button>" +
+      "<button class='modal-option archive' id='opt-archive' onclick=\"flashOption('opt-archive','flash-gold', function(){ archiveCard(" + cardId + "); })\">" + t("archive_card") + "</button>" +
+      "<button class='modal-option danger' id='opt-delete' onclick=\"flashOption('opt-delete','flash-red', function(){ deleteCardAndNext(" + cardId + "); })\">" + t("delete_card_deck") + "</button>" +
       "</div></div>";
   }
 }
@@ -821,9 +1029,9 @@ function deleteCardAndNext(id) {
 function showReturningPopup(cardId) {
   document.getElementById("modal-container").innerHTML =
     "<div class='modal-overlay'><div class='modal'>" +
-    "<h3>💤 Retour d'une carte</h3>" +
-    "<p style='font-size:15px;color:#444;line-height:1.5;margin-bottom:16px'>Cette carte revient après 1 mois de pause 💤... tu la connais toujours ?</p>" +
-    "<button class='btn-save' style='width:100%' onclick='dismissReturning(" + cardId + ")'>OK</button>" +
+    "<h3>" + t("returning_title") + "</h3>" +
+    "<p style='font-size:15px;color:#444;line-height:1.5;margin-bottom:16px'>" + t("returning_text") + "</p>" +
+    "<button class='btn-save' style='width:100%' onclick='dismissReturning(" + cardId + ")'>" + t("ok") + "</button>" +
     "</div></div>";
 }
 function dismissReturning(cardId) {
@@ -841,11 +1049,11 @@ function startReview() { reviewMode = true; view = "study"; buildDeck(); render(
 function exitReview() { reviewMode = false; buildDeck(); render(); }
 
 function exportCards() {
-  var data = { cards: cards, scores: scores };
+  var data = { cards: cards, scores: scores, mode: MODE };
   var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   var url = URL.createObjectURL(blob);
   var a = document.createElement("a");
-  a.href = url; a.download = "flashcards-italien.json"; a.click();
+  a.href = url; a.download = "flashcards-" + MODE.known + "-" + MODE.learn + ".json"; a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -861,9 +1069,9 @@ function importCardsFile(e) {
         scores = data.scores || {};
         nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
         save(); buildDeck(); render();
-        alert(cards.length + " cartes importées avec succès !");
-      } else { alert("Fichier invalide."); }
-    } catch (err) { alert("Erreur lors de la lecture du fichier."); }
+        alert(t("import_success", cards.length));
+      } else { alert(t("import_invalid")); }
+    } catch (err) { alert(t("import_error")); }
   };
   reader.readAsText(file);
   e.target.value = "";
@@ -872,23 +1080,57 @@ function importCardsFile(e) {
 // ===== Authentification =====
 var GOOGLE_SVG = "<svg class='g-logo' viewBox='0 0 48 48'><path fill='#EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/><path fill='#4285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/><path fill='#FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z'/><path fill='#34A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/></svg>";
 
+function setFooter() {
+  var f = document.querySelector(".footer");
+  if (f) f.innerHTML = esc(t("footer_by")) + "<span class='version'>" + VERSION + "</span>";
+}
+
 function renderLogin(msg, msgType) {
   document.body.className = "";
+  uiLang = loginLang;
   var root = document.getElementById("root");
   root.innerHTML =
     "<div class='login-wrap'>" +
-    "<h1>🇮🇹 Flashcards Italien</h1>" +
-    "<p>Connecte-toi pour retrouver tes cartes sur tous tes appareils.</p>" +
-    "<button class='btn-google' id='btn-google' onclick='loginWithGoogle()'>" + GOOGLE_SVG + "Se connecter avec Google</button>" +
-    "<div class='login-sep'><span></span>ou par email<span></span></div>" +
-    "<input class='login-input' id='login-email' type='email' placeholder='ton@email.com' oninput='checkGmailHint()' />" +
-    "<div id='gmail-hint' style='display:none;font-size:13px;color:#9a7524;background:#f3ecdd;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.4'>💡 Tu as une adresse Gmail ? Utilise plutôt le bouton <b>« Se connecter avec Google »</b> ci-dessus : c'est instantané et sans attente.</div>" +
-    "<button class='login-btn' id='login-btn' onclick='sendLoginLink()'>Recevoir le lien de connexion</button>" +
+    "<h1>Flashcards 🇮🇹🇫🇷</h1>" +
+    "<p>" + t("login_subtitle") + "</p>" +
+    "<button class='btn-google' id='btn-google' onclick='loginWithGoogle()'>" + GOOGLE_SVG + t("login_google") + "</button>" +
+    "<div class='login-sep'><span></span>" + t("login_or_email") + "<span></span></div>" +
+    "<input class='login-input' id='login-email' type='email' placeholder='" + esc(t("login_email_ph")) + "' oninput='checkGmailHint()' />" +
+    "<div id='gmail-hint' style='display:none;font-size:13px;color:#9a7524;background:#f3ecdd;border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.4'>" + t("login_gmail_hint") + "</div>" +
+    "<button class='login-btn' id='login-btn' onclick='sendLoginLink()'>" + t("login_send") + "</button>" +
     "<div id='login-msg' class='login-msg " + (msgType || "") + "'>" + (msg || "") + "</div>" +
     "</div>";
+  setFooter();
 }
 
-// Affiche un rappel si l'utilisateur tape une adresse Gmail dans le champ email
+function renderPicker() {
+  document.body.className = "";
+  uiLang = loginLang;
+  var root = document.getElementById("root");
+  root.innerHTML =
+    "<div class='login-wrap'>" +
+    "<div style='font-size:46px;margin-bottom:6px'>👋</div>" +
+    "<p style='margin-bottom:26px;color:#666;font-size:14px'>" + t("pick_sub") + "</p>" +
+    "<button class='pick-btn' onclick=\"chooseMode('it','fr')\"><span class='pfl'>🇮🇹→🇫🇷</span> Imparo il francese</button>" +
+    "<button class='pick-btn' onclick=\"chooseMode('fr','it')\"><span class='pfl'>🇫🇷→🇮🇹</span> J'apprends l'italien</button>" +
+    "</div>";
+  setFooter();
+}
+
+async function chooseMode(known, learn) {
+  MODE = { known: known, learn: learn };
+  uiLang = known;
+  applyTheme();
+  cards = INITIAL_CARDS.map(normalizeCard);
+  scores = {};
+  nextId = cards.length ? Math.max.apply(null, cards.map(function(c){ return c.id; })) + 1 : 1;
+  view = "study";
+  saveLocal();
+  buildDeck();
+  render();
+  saveToCloud();   // crée le document avec le mode → plus d'écran de choix ensuite
+}
+
 function checkGmailHint() {
   var emailEl = document.getElementById("login-email");
   var hint = document.getElementById("gmail-hint");
@@ -907,13 +1149,13 @@ function openFilterMenu() {
   document.getElementById("modal-container").innerHTML =
     "<div class='modal-overlay' onclick='if(event.target===this)closeModal()'><div class='modal'>" +
     "<button class='modal-close' onclick='closeModal()'>×</button>" +
-    "<h3>Filtrer les cartes à réviser</h3>" +
-    "<p class='modal-desc'>Choisis un sous-ensemble de tes cartes en jeu. Le filtre reste actif jusqu'à ce que tu le changes (ou que tu rouvres l'appli).</p>" +
-    mk("all", "Toutes les cartes") +
-    mk("today", "Cartes du jour") +
-    mk("7d", "7 derniers jours") +
-    mk("30d", "30 derniers jours") +
-    mk("hard", "Cartes difficiles") +
+    "<h3>" + t("filter_title") + "</h3>" +
+    "<p class='modal-desc'>" + t("filter_desc") + "</p>" +
+    mk("all", t("flmenu_all")) +
+    mk("today", t("flmenu_today")) +
+    mk("7d", t("flmenu_7d")) +
+    mk("30d", t("flmenu_30d")) +
+    mk("hard", t("flmenu_hard")) +
     "</div></div>";
 }
 function setFilter(f) {
@@ -923,8 +1165,7 @@ function setFilter(f) {
   render();
 }
 
-// ===== Prononciation audio (voix italienne du navigateur) =====
-// Nettoie un texte italien pour la synthèse vocale (retire astérisques, emojis ; "/" -> pause)
+// ===== Prononciation audio (voix de la langue apprise) =====
 function cleanForSpeech(s) {
   return String(s || "")
     .replace(/\*/g, "")
@@ -939,10 +1180,11 @@ function speak(text) {
   try {
     window.speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(text);
-    u.lang = "it-IT";
+    u.lang = LANGS[MODE.learn].tts;
+    var pref = MODE.learn;
     var voices = window.speechSynthesis.getVoices() || [];
     for (var i = 0; i < voices.length; i++) {
-      if (voices[i].lang && voices[i].lang.toLowerCase().indexOf("it") === 0) { u.voice = voices[i]; break; }
+      if (voices[i].lang && voices[i].lang.toLowerCase().indexOf(pref) === 0) { u.voice = voices[i]; break; }
     }
     window.speechSynthesis.speak(u);
   } catch (e) {}
@@ -950,7 +1192,7 @@ function speak(text) {
 function speakWord(id) {
   var c = cards.find(function(x){ return x.id === id; });
   if (!c) return;
-  speak(cleanForSpeech(c.it));
+  speak(cleanForSpeech(c[MODE.learn]));
 }
 function speakExample(id, which) {
   var c = cards.find(function(x){ return x.id === id; });
@@ -958,14 +1200,15 @@ function speakExample(id, which) {
   speak(cleanForSpeech(which === 2 ? c.example2 : c.example));
 }
 
-// ===== Pop-up "Nouveautés" (affiché une seule fois, aux utilisateurs déjà actifs) =====
+// ===== Pop-up "Nouveautés" (uniquement pour les comptes FR→IT existants) =====
 var whatsNewShown = false;
 function maybeShowWhatsNew() {
+  if (MODE.known !== "fr" || MODE.learn !== "it") return;
   if (whatsNewShown) return;
   var seen = false;
   try { seen = localStorage.getItem("fc_whatsnew_v6") === "1"; } catch (e) {}
   if (seen) return;
-  if (cards.length === 5) return; // deck par défaut = nouvel utilisateur : pas d'annonce
+  if (cards.length === 5) return;
   whatsNewShown = true;
   showWhatsNew();
 }
@@ -987,25 +1230,14 @@ function dismissWhatsNew() {
   closeModal();
 }
 
-// Détecte si on est dans une PWA installée (écran d'accueil)
-function isStandalone() {
-  return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
-         window.navigator.standalone === true;
-}
-
 async function loginWithGoogle() {
   var btn = document.getElementById("btn-google");
   var msg = document.getElementById("login-msg");
   if (btn) { btn.disabled = true; }
-  // On privilégie la POPUP partout : sur mobile/PWA, la redirection perd souvent la
-  // session au retour (stockage cloisonné anti-traçage), ce qui ramène à l'écran de
-  // connexion sans connecter. La popup contourne ce problème. Redirection = secours.
   try {
     await signInWithPopup(auth, googleProvider);
-    // Succès : onAuthStateChanged prend le relais automatiquement.
   } catch (err) {
     var code = err && err.code ? err.code : "";
-    // Cas où la popup n'est pas utilisable → on tente la redirection en secours
     if (code === "auth/popup-blocked" ||
         code === "auth/operation-not-supported-in-this-environment" ||
         code === "auth/cancelled-popup-request") {
@@ -1015,9 +1247,9 @@ async function loginWithGoogle() {
     if (msg) {
       msg.className = "login-msg err";
       if (code === "auth/popup-closed-by-user") {
-        msg.textContent = "Connexion annulée. Réessaie.";
+        msg.textContent = t("login_google_cancel");
       } else {
-        msg.textContent = "Erreur de connexion Google : " + (err && err.message ? err.message : "réessaie.");
+        msg.textContent = t("login_google_err", (err && err.message ? err.message : t("login_google_retry")));
       }
     }
   }
@@ -1028,44 +1260,42 @@ async function sendLoginLink() {
   var btn = document.getElementById("login-btn");
   var msg = document.getElementById("login-msg");
   var email = emailEl.value.trim();
-  if (!email || email.indexOf("@") === -1) { msg.className = "login-msg err"; msg.textContent = "Entre une adresse email valide."; return; }
-  // Adresse Gmail → on oriente vers le bouton Google (plus rapide et sans quota d'emails)
+  if (!email || email.indexOf("@") === -1) { msg.className = "login-msg err"; msg.textContent = t("login_email_invalid"); return; }
   if (/@(gmail\.com|googlemail\.com)$/i.test(email)) {
     msg.className = "login-msg";
     msg.style.color = "#9a7524";
-    msg.innerHTML = "Ton adresse est une adresse Google. Utilise plutôt le bouton <b>« Se connecter avec Google »</b> en haut : c'est instantané et tu retrouveras le même compte.";
+    msg.innerHTML = t("login_gmail_redirect");
     return;
   }
-  btn.disabled = true; btn.textContent = "Envoi en cours...";
+  btn.disabled = true; btn.textContent = t("login_sending");
   var actionCodeSettings = { url: APP_URL, handleCodeInApp: true };
   try {
     await sendSignInLinkToEmail(auth, email, actionCodeSettings);
     window.localStorage.setItem("fc_emailForSignIn", email);
     msg.className = "login-msg ok";
-    msg.innerHTML = "✓ Un lien de connexion a été envoyé à<br><b>" + esc(email) + "</b><br><br>Ouvre ta boîte mail et clique sur le lien pour te connecter. Tu peux fermer cet onglet.";
+    msg.innerHTML = t("login_link_sent", esc(email));
   } catch (err) {
     msg.className = "login-msg err";
     if (err && err.code === "auth/quota-exceeded") {
-      msg.innerHTML = "Trop de demandes d'emails aujourd'hui (limite Firebase). Essaie plutôt le bouton <b>Se connecter avec Google</b> ci-dessus, ou réessaie demain.";
+      msg.innerHTML = t("login_quota");
     } else {
-      msg.textContent = "Erreur : " + (err && err.message ? err.message : "impossible d'envoyer le lien.");
+      msg.textContent = t("login_error", (err && err.message ? err.message : t("login_cannot_send")));
     }
-    btn.disabled = false; btn.textContent = "Recevoir le lien de connexion";
+    btn.disabled = false; btn.textContent = t("login_send");
   }
 }
 
 async function doLogout() {
-  if (!confirm("Se déconnecter ? Tes cartes sont sauvegardées dans le cloud.")) return;
+  if (!confirm(t("logout_confirm"))) return;
   try { await signOut(auth); } catch (e) {}
   window.location.reload();
 }
 
-// ===== Démarrage : finaliser connexions (lien email + redirection Google) =====
 async function completeEmailLinkSignIn() {
   if (isSignInWithEmailLink(auth, window.location.href)) {
     var email = window.localStorage.getItem("fc_emailForSignIn");
     if (!email) {
-      email = window.prompt("Confirme ton adresse email pour terminer la connexion :");
+      email = window.prompt(t("confirm_email_prompt"));
     }
     if (email) {
       try {
@@ -1073,7 +1303,7 @@ async function completeEmailLinkSignIn() {
         window.localStorage.removeItem("fc_emailForSignIn");
         window.history.replaceState({}, document.title, APP_URL);
       } catch (err) {
-        renderLogin("Erreur de connexion : le lien est peut-être expiré. Réessaie.", "err");
+        renderLogin(t("login_link_expired"), "err");
         return;
       }
     }
@@ -1083,29 +1313,40 @@ async function completeEmailLinkSignIn() {
 async function completeGoogleRedirect() {
   try {
     await getRedirectResult(auth);
-    // Si connexion réussie, onAuthStateChanged s'en occupe.
-  } catch (err) {
-    // Erreur silencieuse : l'écran de login s'affichera normalement
-  }
+  } catch (err) {}
 }
 
 onAuthStateChanged(auth, async function(user) {
   if (user) {
     currentUser = user;
     renderLoadingState();
-    await loadFromCloud();
+    var res = await loadFromCloud();
+    // Aperçu de l'écran de choix
+    if (PREVIEW === "pick") { renderPicker(); return; }
+    if (res && res.needsPicker) {
+      if (PREVIEW) { cards = INITIAL_CARDS.map(normalizeCard); scores = {}; nextId = 6; }
+      else { renderPicker(); return; }
+    }
+    // Aperçu : on force le sens demandé, sans rien sauvegarder
+    if (PREVIEW === "itfr") MODE = { known: "it", learn: "fr" };
+    else if (PREVIEW === "frit") MODE = { known: "fr", learn: "it" };
+    uiLang = MODE.known;
+    applyTheme();
     buildDeck();
     render();
-    maybeShowWhatsNew();
+    if (!PREVIEW) maybeShowWhatsNew();
   } else {
     currentUser = null;
+    uiLang = loginLang;
     renderLogin();
   }
 });
 
 function renderLoadingState() {
+  uiLang = loginLang;
   var root = document.getElementById("root");
-  root.innerHTML = "<div class='login-wrap'><h1>🇮🇹 Flashcards Italien</h1><p>Chargement de tes cartes...</p></div>";
+  root.innerHTML = "<div class='login-wrap'><h1>Flashcards 🇮🇹🇫🇷</h1><p>" + t("loading") + "</p></div>";
+  setFooter();
 }
 
 // Expose les fonctions au scope global (pour les onclick inline)
@@ -1146,8 +1387,10 @@ window.speakWord = speakWord;
 window.speakExample = speakExample;
 window.dismissWhatsNew = dismissWhatsNew;
 window.doLogout = doLogout;
+window.chooseMode = chooseMode;
 
-// Pré-charge les voix de synthèse vocale (certains navigateurs les chargent en différé)
+setFooter();
+
 if ("speechSynthesis" in window) {
   try { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = function(){}; } catch (e) {}
 }
@@ -1156,8 +1399,6 @@ document.getElementById("import-input").addEventListener("change", importCardsFi
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 
-// Lancement : d'abord finaliser une éventuelle connexion (lien email OU redirection Google),
-// puis onAuthStateChanged gère l'affichage.
 (async function start() {
   await completeGoogleRedirect();
   await completeEmailLinkSignIn();

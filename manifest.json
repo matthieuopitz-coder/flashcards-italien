@@ -1,6 +1,6 @@
 {
-  "name": "Flashcards Italien",
-  "short_name": "Flashcards IT",
+  "name": "Flashcards",
+  "short_name": "Flashcards",
   "description": "Apprends le vocabulaire italien avec des flashcards",
   "start_url": "/flashcards-italien/",
   "scope": "/flashcards-italien/",

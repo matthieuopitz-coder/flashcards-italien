@@ -14,6 +14,7 @@
     :root {
       --primary: #009246; --success: #009246; --danger: #CE2B37;
       --soft: #eef7f1; --bg: #E3EEEA; --footer-text: #a1b3ad;
+      --appbg: linear-gradient(135deg, #17a55a 0%, #17a55a 32%, #0a5fb8 100%);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: var(--bg); min-height: 100vh; touch-action: manipulation; }
@@ -150,9 +151,9 @@
     body.brand .login-input:focus { border-color: #1f7fb8; }
     body.brand .pick-btn:hover { border-color: #0a5fb8; background: #eef3fb; }
 
-    /* ===== TEST : dégradé vif partout (un peu plus de vert) ===== */
-    body { background: linear-gradient(135deg, #17a55a 0%, #17a55a 32%, #0a5fb8 100%); }
-    body.brand { background: linear-gradient(135deg, #17a55a 0%, #17a55a 32%, #0a5fb8 100%); }
+    /* ===== Fond dégradé, piloté par la langue apprise (voir applyTheme) ===== */
+    body { background: var(--appbg); }
+    body.brand { background: var(--appbg); }
     .footer { background: transparent; color: rgba(255,255,255,.82); }
     .footer .version { color: rgba(255,255,255,.72); }
     h2 { color: #fff; }
@@ -253,6 +254,10 @@ function applyTheme(){
   r.setProperty("--soft", th.soft);
   r.setProperty("--bg", th.bg);
   r.setProperty("--footer-text", th.footerText);
+  // Fond par langue apprise : italien = plus de vert, français = un peu moins de vert
+  r.setProperty("--appbg", MODE.learn === "it"
+    ? "linear-gradient(135deg, #17a55a 0%, #17a55a 32%, #0a5fb8 100%)"
+    : "linear-gradient(135deg, #17a55a 0%, #0a5fb8 100%)");
   THEME = th;
   document.documentElement.lang = MODE.known;
   var meta = document.querySelector('meta[name="theme-color"]');
